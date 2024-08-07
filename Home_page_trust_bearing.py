@@ -53,13 +53,17 @@ def baca_data_arduino():
             if input_data == "start_scan":
                 print(f"FROM ARDUINO: {input_data}")
                 inspectionFlag = True
+                update_data_dict('trigger_start', True)
                 break
             elif input_data == "reset_scan":
                 print(f"FROM ARDUINO: {input_data}")
                 resetInspectionFlag = True
                 inspectionFlag = False
+                update_data_dict('trigger_reset', True)
                 break
             else:
+                update_data_dict('trigger_start', False)
+                update_data_dict('trigger_reset', False)
                 print(f"FROM ARDUINO: {input_data}")
                 break
         except serial.SerialException:
@@ -93,8 +97,8 @@ def stream_video(device):
                    b'Content-Type: image/jpeg\r\n\r\n' + error_frame + b'\r\n')
     
     # Set frame width and height for 16:9 aspect ratio and 1080p resolution
-    frame_width = 3840
-    frame_height = 2160  # Initial frame height for 16:9 aspect ratio and 720p resolution
+    frame_width = 1280
+    frame_height = 720  # Initial frame height for 16:9 aspect ratio and 720p resolution
 
     # Calculate the frame width based on the aspect ratio
     frame_width = int((frame_height / 9) * 16)
@@ -149,7 +153,7 @@ def stream_video(device):
             update_data_dict('img_path', img_path)
             update_data_dict('sesion_judges', updateData['sesion_judges']+1)
             update_data_dict('total_judges', updateData['total_judges']+1)
-
+      
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
@@ -169,7 +173,7 @@ def save_image(images_to_save, raw_file_name, image_category):
 
     # Get current date and time for saving the file name.
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    file_name = f"{corrected_name}_{timestamp}.jpg"
+    file_name = f"{corrected_name}_{timestamp}"
     
     # Buat Direktory download
     current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -177,7 +181,7 @@ def save_image(images_to_save, raw_file_name, image_category):
     os.makedirs(downloads_directory, exist_ok=True)
     
     #simpan ke direktori download
-    image_path = os.path.join(downloads_directory, f"{file_name}.png")  # Menambahkan timestamp pada nama file
+    image_path = os.path.join(downloads_directory, f"{file_name}.jpg")  # Menambahkan timestamp pada nama file
     
     cv2.imwrite(image_path, images_to_save)
     print(f"Gambar disimpan di {image_path}")
