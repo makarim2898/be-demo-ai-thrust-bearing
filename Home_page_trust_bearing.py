@@ -15,7 +15,7 @@ CORS(home_bearing)
 #definisi variabel global untuk flags
 inspectionFlag = False
 bearing_detected = False
-
+resetInspectionFlag = True
 #definisi variabel global untuk
 latest_frame = None
 updateData = {'total_judges': 0,
@@ -23,6 +23,7 @@ updateData = {'total_judges': 0,
               'trigger_start': 0,
               'trigger_reset':0,
               'last_judgement': 'NG',
+              'img_path' : ''
               }
 
 model = YOLO("./models/yolov8m.pt")
@@ -33,7 +34,7 @@ def init_serial_connection():
     while True:
         print("init_serial_connection called")
         try:
-            arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=0.1)  # Initialize the Arduino port with shorter timeout
+            arduino = serial.Serial('/dev/arduino', 115200, timeout=0.1)  # Initialize the Arduino port with shorter timeout
             if arduino.isOpen():  # Check if the serial port is open
                 arduino.close()  # Close the port if it is open
             arduino.open()  # Reopen the serial port
@@ -45,7 +46,7 @@ def init_serial_connection():
             time.sleep(5)  # Wait for 5 seconds before trying again
 
 def baca_data_arduino():
-    global arduino, inspectionFlag
+    global arduino, inspectionFlag, resetInspectionFlag
     while True:
         try:
             input_data = arduino.readline().strip().decode('utf-8')
@@ -53,9 +54,13 @@ def baca_data_arduino():
                 print(f"FROM ARDUINO: {input_data}")
                 inspectionFlag = True
                 break
-            elif input_data == "no trigger":
+            elif input_data == "reset_scan":
                 print(f"FROM ARDUINO: {input_data}")
+                resetInspectionFlag = True
                 inspectionFlag = False
+                break
+            else:
+                print(f"FROM ARDUINO: {input_data}")
                 break
         except serial.SerialException:
             print("Serial connection error. Waiting for reconnection...")
@@ -63,12 +68,13 @@ def baca_data_arduino():
             init_serial_connection()  # Reinitialize the serial connection
         except UnicodeDecodeError:
             print("Error decoding input data.")
+############## end of function untuk arduino communication #########
     
     
 
 ############## function untuk stream frame ke client ################
 def stream_video(device):
-    global latest_frame, bearing_detected, inspectionFlag, updateData
+    global latest_frame, bearing_detected, inspectionFlag, updateData, resetInspectionFlag
     time.sleep(2)
     cap = cv2.VideoCapture(device)
     
@@ -117,28 +123,30 @@ def stream_video(device):
         
         #read arduino data serial
         baca_data_arduino()
-        
+        print ("flag status", resetInspectionFlag, inspectionFlag)
         #jika trigger untuk deteksi on
-        if inspectionFlag:
+        if inspectionFlag and resetInspectionFlag:
+            print("ini didalam if scann")
         # logika untuk mendapatkan data object yang di deteksi
         #kemudian perbarui nilai di global variabel bearing_detected
             for r in results:
                 detected_object = len(r.boxes.cls)
                 if detected_object:
                     bearing_detected = True
-                    save_image(annotated_frame, 'OKE', 'Deteksi_oke')
+                    img_path = save_image(annotated_frame, 'OKE', 'Deteksi_oke')
                     print(f'Detected object: {detected_object}')
                     latest_frame = frame
-                    inspectionFlag = False
+                    resetInspectionFlag = False
                 else:
                     bearing_detected = False
                     print('No bearing object detected')
-                    save_image(annotated_frame, 'NG', 'Tidak_terdeteksi')
+                    img_path = save_image(annotated_frame, 'NG', 'Tidak_terdeteksi')
                     print(f'Detected object: {detected_object}')
                     latest_frame = frame
-                    inspectionFlag = False
+                    resetInspectionFlag = False
             
             update_data_dict('last_judgement', bearing_detected)
+            update_data_dict('img_path', img_path)
             update_data_dict('sesion_judges', updateData['sesion_judges']+1)
             update_data_dict('total_judges', updateData['total_judges']+1)
 
@@ -173,6 +181,7 @@ def save_image(images_to_save, raw_file_name, image_category):
     
     cv2.imwrite(image_path, images_to_save)
     print(f"Gambar disimpan di {image_path}")
+    return image_path
 
 ############## Function untuk menampilkan last detection #################
 def last_detection():
@@ -202,7 +211,7 @@ def update_data_dict(key, value):
 ####################### END POINT ##########################
 @home_bearing.route('/bearing/show-video', methods=['GET'])
 def home_show_video():
-    id_camera = request.args.get('id_camera', default=0, type=int)
+    id_camera = request.args.get('id_camera', default=2, type=int)
     init_serial_connection()
     print(f'Settings show video with camera index {id_camera}')
     return Response(stream_video(id_camera), mimetype='multipart/x-mixed-replace; boundary=frame')
