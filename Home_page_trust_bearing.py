@@ -80,6 +80,25 @@ def baca_data_arduino():
             init_serial_connection()  # Reinitialize the serial connection
         except UnicodeDecodeError:
             print("Error decoding input data.")
+            
+def kirim_data_ke_arduino(data):
+    global arduino
+    try:
+        if arduino.is_open:
+            arduino.write(data.encode('utf-8'))
+            print(f"Data sent to Arduino: {data}")
+        else:
+            print("Serial port is not open. Reinitializing connection...")
+            init_serial_connection()
+            arduino.write(data.encode('utf-8'))
+            print(f"Data sent to Arduino: {data}")
+    except serial.SerialException as e:
+        print(f"Error sending data to Arduino: {e}")
+        arduino.close()
+        init_serial_connection()  # Reinitialize the serial connection
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+
 ############## end of function untuk arduino communication #########
     
     
@@ -149,6 +168,7 @@ def stream_video(device):
                     save_image(annotated_frame, 'GOOD', 'Deteksi_oke')
                     print(f'Detected object: {detected_object}')
                     latest_frame = frame
+                    kirim_data_ke_arduino("out_ok")
                     resetInspectionFlag = False
                 else:
                     bearing_detected = False
@@ -156,6 +176,7 @@ def stream_video(device):
                     save_image(annotated_frame, 'NG', 'Tidak_terdeteksi')
                     print(f'Detected object: {detected_object}')
                     latest_frame = frame
+                    kirim_data_ke_arduino("out_ng")
                     resetInspectionFlag = False
             
             update_data_dict('last_judgement', bearing_detected)
