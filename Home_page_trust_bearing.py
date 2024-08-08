@@ -23,7 +23,8 @@ updateData = {'total_judges': 0,
               'trigger_start': 0,
               'trigger_reset':0,
               'last_judgement': 'NG',
-              'img_path' : ''
+              'img_path' : '',
+              'arduino_connected': False,
               }
 
 model = YOLO("./models/yolov8m.pt")
@@ -39,8 +40,15 @@ def init_serial_connection():
                 arduino.close()  # Close the port if it is open
             arduino.open()  # Reopen the serial port
             print("Connection established.")
+            
+            #update flag arduino connected
+            update_data_dict('arduino_connected', True)
+            
             break  # Exit the loop if successful
         except serial.SerialException as e:
+            #update flag arduino conection
+            update_data_dict('arduino_connected', False)
+            
             print(f"Serial connection error during initialization: {e}")
             print("Waiting for connection...")
             time.sleep(5)  # Wait for 5 seconds before trying again
@@ -97,8 +105,8 @@ def stream_video(device):
                    b'Content-Type: image/jpeg\r\n\r\n' + error_frame + b'\r\n')
     
     # Set frame width and height for 16:9 aspect ratio and 1080p resolution
-    frame_width = 1280
-    frame_height = 720  # Initial frame height for 16:9 aspect ratio and 720p resolution
+    frame_width = 720
+    frame_height = 480  # Initial frame height for 16:9 aspect ratio and 720p resolution
 
     # Calculate the frame width based on the aspect ratio
     frame_width = int((frame_height / 9) * 16)
@@ -152,7 +160,6 @@ def stream_video(device):
             
             update_data_dict('last_judgement', bearing_detected)
             update_data_dict('sesion_judges', updateData['sesion_judges']+1)
-            update_data_dict('total_judges', updateData['total_judges']+1)
       
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
@@ -199,6 +206,8 @@ def function_update_csv(pathImg, filename):
     result, date, time= filename.split('_')
     
     id_terakhir += 1
+    
+    update_data_dict('total_judges', int(id_terakhir))
     
     new_data= {
         "inspection_id" : int(id_terakhir),
