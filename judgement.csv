@@ -4,3 +4,16 @@ inspection_id,inspection_date,inspection_time,inspection_result,image_path
 2,20240808.0,185944,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_185944.jpg
 3,20240808.0,190011,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_190011.jpg
 4,20240808.0,190023,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_190023.jpg
+5,20240808.0,191434,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_191434.jpg
+6,20240808.0,191439,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_191439.jpg
+7,20240808.0,191444,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_191444.jpg
+8,20240808.0,192352,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_192352.jpg
+9,20240808.0,192356,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_192356.jpg
+10,20240808.0,192424,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Tidak_terdeteksi/NG_20240808_192424.jpg
+11,20240808.0,192432,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Tidak_terdeteksi/NG_20240808_192432.jpg
+12,20240808.0,192443,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_192443.jpg
+13,20240808.0,192724,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_192724.jpg
+14,20240808.0,192738,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_192738.jpg
+15,20240808.0,192845,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_192845.jpg
+16,20240808.0,192852,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_192852.jpg
+17,20240808.0,192857,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_192857.jpg
