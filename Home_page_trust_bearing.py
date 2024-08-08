@@ -127,6 +127,7 @@ def stream_video(device):
         
         #read arduino data serial
         baca_data_arduino()
+        
         print ("flag status", resetInspectionFlag, inspectionFlag)
         #jika trigger untuk deteksi on
         if inspectionFlag and resetInspectionFlag:
@@ -137,20 +138,19 @@ def stream_video(device):
                 detected_object = len(r.boxes.cls)
                 if detected_object:
                     bearing_detected = True
-                    img_path = save_image(annotated_frame, 'OKE', 'Deteksi_oke')
+                    save_image(annotated_frame, 'GOOD', 'Deteksi_oke')
                     print(f'Detected object: {detected_object}')
                     latest_frame = frame
                     resetInspectionFlag = False
                 else:
                     bearing_detected = False
                     print('No bearing object detected')
-                    img_path = save_image(annotated_frame, 'NG', 'Tidak_terdeteksi')
+                    save_image(annotated_frame, 'NG', 'Tidak_terdeteksi')
                     print(f'Detected object: {detected_object}')
                     latest_frame = frame
                     resetInspectionFlag = False
             
             update_data_dict('last_judgement', bearing_detected)
-            update_data_dict('img_path', img_path)
             update_data_dict('sesion_judges', updateData['sesion_judges']+1)
             update_data_dict('total_judges', updateData['total_judges']+1)
       
@@ -185,8 +185,36 @@ def save_image(images_to_save, raw_file_name, image_category):
     
     cv2.imwrite(image_path, images_to_save)
     print(f"Gambar disimpan di {image_path}")
-    return image_path
+    
+    # Update judgment.csv file with the new data.
+    function_update_csv(image_path, file_name)
+    
 
+def function_update_csv(pathImg, filename):
+    global updateData
+    
+    df = pd.read_csv("judgement.csv")
+    id_terakhir = df['inspection_id'].iloc[-1]
+    
+    result, date, time= filename.split('_')
+    
+    id_terakhir += 1
+    
+    new_data= {
+        "inspection_id" : int(id_terakhir),
+        "inspection_date" : int(date),
+        "inspection_time" : int(time),
+        "inspection_result" : result,
+        "image_path" : pathImg
+    }
+    
+    new_row = pd.DataFrame([new_data])
+    df = pd.concat([df, new_row], ignore_index=True)
+    df.to_csv("judgement.csv", index=False)
+    print("Data has been updated in judgement.csv")
+    
+        
+        
 ############## Function untuk menampilkan last detection #################
 def last_detection():
     global latest_frame
