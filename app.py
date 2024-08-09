@@ -2,11 +2,13 @@ from flask import Flask
 from flask_cors import CORS
 from settings_function import settings
 from Home_page_trust_bearing import home_bearing
+from information import information
 
 app = Flask(__name__)
 CORS(app)
 app.register_blueprint(settings)
 app.register_blueprint(home_bearing)
+app.register_blueprint(information)
 
 @app.route('/')
 def index():
