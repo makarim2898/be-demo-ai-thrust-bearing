@@ -83,6 +83,15 @@ def stream_video(device):
     cap.release()
     cv2.destroyAllWindows()
 
+
+def updateIndexMainCamera():
+    global id_camera
+    df = pd.read_csv('cameraConfig.csv')
+    idx_cam_1 = df[df['camera_nm'] == 1]['camera_idx'][0]
+    id_camera = idx_cam_1
+    
+updateIndexMainCamera()
+    
 ################################### streaming image to client   #################################################
 @settings.route('/settings-show-video', methods=['GET'])
 def settings_show_video():
