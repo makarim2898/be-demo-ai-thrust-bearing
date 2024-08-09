@@ -243,8 +243,6 @@ def function_update_csv(pathImg, filename):
     df.to_csv("judgement.csv", index=False)
     print("Data has been updated in judgement.csv")
     
-        
-        
 ############## Function untuk menampilkan last detection #################
 def last_detection():
     global latest_frame
@@ -269,7 +267,12 @@ def update_data_dict(key, value):
     global updateData
     updateData[key] = value
     
-
+def get_total_judges():
+    df = pd.read_csv("judgement.csv")
+    id_terakhir = df['inspection_id'].iloc[-1]
+    update_data_dict('total_judges', int(id_terakhir))
+    
+get_total_judges()
 ####################### END POINT ##########################
 @home_bearing.route('/bearing/show-video', methods=['GET'])
 def home_show_video():
