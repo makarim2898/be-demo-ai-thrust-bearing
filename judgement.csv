@@ -1,5 +1,4 @@
 inspection_id,inspection_date,inspection_time,inspection_result,image_path
-0,0.0,GOOD,“img.jpg”,
 1,20240808.0,185813,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_185813.jpg
 2,20240808.0,185944,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_185944.jpg
 3,20240808.0,190011,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_190011.jpg
@@ -17,3 +16,5 @@ inspection_id,inspection_date,inspection_time,inspection_result,image_path
 15,20240808.0,192845,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_192845.jpg
 16,20240808.0,192852,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_192852.jpg
 17,20240808.0,192857,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_192857.jpg
+18,20240808.0,193924,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_193924.jpg
+19,20240808.0,215520,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_215520.jpg
