@@ -37,7 +37,7 @@ def stream_video(device):
     global zoom_level, focus_level, latest_frame
     time.sleep(2)
     cap = cv2.VideoCapture(device)
-    
+    time.sleep(2)
     if not cap.isOpened():
         # Generate a placeholder frame with error message
         error_frame = np.zeros((500, 800, 3), np.uint8)
@@ -237,6 +237,30 @@ def get_settings():
     print(camera_parameters) 
     # Mengembalikan respons JSON
     return camera_parameters
+
+@settings.route('/settings-get-camera-cfg', methods=['GET'])
+def get_settings_cfg():
+    df = pd.read_csv('cameraConfig.csv')
+    camera_cfg = df.to_dict(orient='records')
+    print(camera_cfg) 
+    # Mengembalikan respons JSON
+    return camera_cfg
+
+@settings.route('/settings-update-camera-cfg', methods=['GET'])
+def update_config():
+    idx_cam_1 = request.args.get('camera_idx', default=2, type=int)
+    
+    data = [
+    {"camera_nm": 1, "camera_idx": idx_cam_1},
+    ]
+    
+    print(data)
+    df = pd.DataFrame(data)
+    
+    df.to_csv('cameraConfig.csv', index=False)
+     
+    # Mengembalikan respons JSON
+    return data
 
 @settings.route('/tipu', methods=['GET'])
 def tipu_index():
