@@ -8,6 +8,7 @@ import numpy as np
 import time
 from ultralytics import YOLO
 import serial
+import threading
 
 home_bearing = Blueprint('bearing_routes', __name__)
 CORS(home_bearing)
@@ -106,6 +107,17 @@ def kirim_data_ke_arduino(data):
         init_serial_connection()  # Reinitialize the serial connection
     except Exception as e:
         print(f"Unexpected error: {e}")
+        
+def baca_data_arduino_thread():
+    while True:
+        baca_data_arduino()
+        
+# Membuat thread baru untuk membaca data dari Arduino
+arduino_thread = threading.Thread(target=baca_data_arduino_thread)
+
+# Mengatur thread sebagai daemon agar thread tersebut berhenti ketika program utama berhenti
+arduino_thread.daemon = True
+
 
 ############## end of function untuk arduino communication #########
     
@@ -187,9 +199,9 @@ def stream_video(device):
         frame = buffer.tobytes()
         
         ########### baca data serial pada arduino #############
-        baca_data_arduino()
+        # baca_data_arduino()
         
-        print ("flag status", resetInspectionFlag, inspectionFlag)
+        print ("flag status", inspectionFlag, resetInspectionFlag)
         
         ########## Kondidional untuk handle proses inspeksi ###########
         if inspectionFlag and resetInspectionFlag:
@@ -319,6 +331,8 @@ def home_show_video():
     id_camera = readCameraIndex()
     print(f"====================  {id_camera}  ====================")
     init_serial_connection()
+    # Memulai eksekusi thread baru
+    arduino_thread.start()
     print(f'Settings show video with camera index {id_camera}')
     return Response(stream_video(id_camera), mimetype='multipart/x-mixed-replace; boundary=frame')
 
