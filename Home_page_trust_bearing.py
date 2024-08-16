@@ -27,7 +27,7 @@ updateData = {'total_judges': 0,
               'arduino_connected': False,
               }
 
-model = YOLO("./models/yolov8m.pt")
+model = YOLO("./models/model1yolov10n.pt")
 
 ############## function untuk arduino communication #########
 def init_serial_connection():
@@ -136,7 +136,7 @@ def stream_video(device):
         if not ret:
             print("Tidak dapat membaca frame")
             break
-        results = model(frame, conf=0.9, classes=0)
+        results = model(frame, conf=0.1, max_det=2)
         annotated_frame = results[0].plot()
                     
         # dibawah ini logika untuk memperkecil ukuran frame agar ringan saat di show up
@@ -266,17 +266,27 @@ def last_detection():
 def update_data_dict(key, value):
     global updateData
     updateData[key] = value
-    
+
+############## Function get total judges dari csv file #################
 def get_total_judges():
     df = pd.read_csv("judgement.csv")
     id_terakhir = df['inspection_id'].iloc[-1]
     update_data_dict('total_judges', int(id_terakhir))
     
 get_total_judges()
+
+############# 
+def readCameraIndex():
+    df = pd.read_csv('cameraConfig.csv')
+    idx_cam_1 = df[df['camera_nm'] == 1]['camera_idx'][0]
+    id_camera = idx_cam_1
+    return id_camera
+
 ####################### END POINT ##########################
 @home_bearing.route('/bearing/show-video', methods=['GET'])
 def home_show_video():
-    id_camera = request.args.get('id_camera', default=2, type=int)
+    id_camera = readCameraIndex()
+    print(f"====================  {id_camera}  ====================")
     init_serial_connection()
     print(f'Settings show video with camera index {id_camera}')
     return Response(stream_video(id_camera), mimetype='multipart/x-mixed-replace; boundary=frame')
