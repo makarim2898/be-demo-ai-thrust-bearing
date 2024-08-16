@@ -53,8 +53,8 @@ def stream_video(device):
                    b'Content-Type: image/jpeg\r\n\r\n' + error_frame + b'\r\n')
     
     # Set frame width and height for 16:9 aspect ratio and 1080p resolution
-    frame_width = 3840
-    frame_height = 2160  # Initial frame height for 16:9 aspect ratio and 720p resolution
+    frame_width = 720
+    frame_height = 480  # Initial frame height for 16:9 aspect ratio and 720p resolution
 
     # Calculate the frame width based on the aspect ratio
     frame_width = int((frame_height / 9) * 16)
@@ -65,6 +65,7 @@ def stream_video(device):
         if not ret:
             print("Tidak dapat membaca frame")
             break
+        latest_frame = frame
         
         #Set frame width and height for 16:9 aspect ratio and 1080p resolution
         frame_width = 1280
@@ -73,7 +74,6 @@ def stream_video(device):
         # Calculate the frame width based on the aspect ratio
         frame_width = int((frame_height / 9) * 16)
         frame = cv2.resize(frame, (int(frame_width * (810 / frame_height)), 810))
-        latest_frame = frame
         ret, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
 
@@ -147,7 +147,7 @@ def switch_camera():
     print(f"Camera id is set to {id_camera}")
     return Response(str(id_camera))
 
-
+################################### Save images  #################################################
 @settings.route('/settings-save-images', methods=['GET'])
 def save_images():
     global latest_frame
@@ -156,7 +156,7 @@ def save_images():
 
     # Get current date and time for saving the file name.
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    file_name = f"{corrected_name}_{timestamp}.jpg"
+    file_name = f"{corrected_name}_{timestamp}"
     
     # Buat Direktory download
     current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -257,7 +257,7 @@ def get_settings_cfg():
 
 @settings.route('/settings-update-camera-cfg', methods=['GET'])
 def update_config():
-    idx_cam_1 = request.args.get('camera_idx', default=2, type=int)
+    idx_cam_1 = request.args.get('camera_idx', default=0, type=int)
     
     data = [
     {"camera_nm": 1, "camera_idx": idx_cam_1},
