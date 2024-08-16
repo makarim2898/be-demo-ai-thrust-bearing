@@ -17,6 +17,8 @@ CORS(home_bearing)
 inspectionFlag = False
 bearing_detected = False
 resetInspectionFlag = True
+
+
 #definisi variabel global untuk
 latest_frame = None
 updateData = {'total_judges': 0,
@@ -108,16 +110,16 @@ def kirim_data_ke_arduino(data):
     except Exception as e:
         print(f"Unexpected error: {e}")
         
+stop_event = threading.Event()
+
 def baca_data_arduino_thread():
-    while True:
+    while not stop_event.is_set():
+        print("Reading arduino serial")
         baca_data_arduino()
-        
-# Membuat thread baru untuk membaca data dari Arduino
+
+# Menginisialisasi thread di luar fungsi stream_video
 arduino_thread = threading.Thread(target=baca_data_arduino_thread)
-
-# Mengatur thread sebagai daemon agar thread tersebut berhenti ketika program utama berhenti
 arduino_thread.daemon = True
-
 
 ############## end of function untuk arduino communication #########
     
@@ -128,7 +130,6 @@ def stream_video(device):
     global latest_frame, bearing_detected, inspectionFlag, updateData, resetInspectionFlag
     time.sleep(2)
     cap = cv2.VideoCapture(device)
-    
     if not cap.isOpened():
         # Generate a placeholder frame with error message
         error_frame = np.zeros((500, 800, 3), np.uint8)
@@ -143,6 +144,8 @@ def stream_video(device):
         yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + error_frame + b'\r\n')
     
+    if not arduino_thread.is_alive():
+        arduino_thread.start()
     # Set frame width and height for 16:9 aspect ratio and 1080p resolution
     frame_width = 720
     frame_height = 480  # Initial frame height for 16:9 aspect ratio and 720p resolution
@@ -231,6 +234,8 @@ def stream_video(device):
 
     cap.release()
     cv2.destroyAllWindows()
+    
+    
     
 ############## Function untuk start inspection #################
 def start_inspection():
@@ -325,14 +330,12 @@ def readCameraIndex():
     id_camera = idx_cam_1
     return id_camera
 
-####################### END POINT ##########################
+############################################################# END POINT ####################################################################################
 @home_bearing.route('/bearing/show-video', methods=['GET'])
 def home_show_video():
     id_camera = readCameraIndex()
     print(f"====================  {id_camera}  ====================")
     init_serial_connection()
-    # Memulai eksekusi thread baru
-    arduino_thread.start()
     print(f'Settings show video with camera index {id_camera}')
     return Response(stream_video(id_camera), mimetype='multipart/x-mixed-replace; boundary=frame')
 
