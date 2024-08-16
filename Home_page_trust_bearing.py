@@ -36,12 +36,6 @@ custom_names = {0: "OK", 1: "NG"}  # Update with your actual class IDs and custo
 # Custom colors for each class
 custom_colors = {0: (0, 255, 0), 1: (0, 0, 255)}  # Green for Class 1, Red for Class 2
 
-def function_A():
-    print("Function A executed")
-
-def function_B():
-    print("Function B executed")
-
 
 ############## function untuk arduino communication #########
 def init_serial_connection():
@@ -183,12 +177,6 @@ def stream_video(device):
                 # Put the label text on the frame
                 cv2.putText(frame, label, (x1, label_ymin - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
-        # Execute function A or B based on the count of class 0
-        if hitung_yang_ok >= 2:
-            function_A()
-        else:
-            function_B()
-               
         ########## proses resize frame untuk dikirim ke client ###########
         frame_width = 1280
         frame_height = 720
