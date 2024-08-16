@@ -57,3 +57,16 @@ inspection_id,inspection_date,inspection_time,inspection_result,image_path
 56,20240816.0,143321,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/not_complete/NG_20240816_143321.jpg
 57,20240816.0,143328,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/not_complete/NG_20240816_143328.jpg
 58,20240816.0,143351,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240816_143351.jpg
+59,20240816.0,145556,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240816_145556.jpg
+60,20240816.0,145646,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240816_145646.jpg
+61,20240816.0,145653,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240816_145653.jpg
+62,20240816.0,151038,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/not_complete/NG_20240816_151038.jpg
+63,20240816.0,151046,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/not_complete/NG_20240816_151046.jpg
+64,20240816.0,151237,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/not_complete/NG_20240816_151237.jpg
+65,20240816.0,151535,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/not_complete/NG_20240816_151535.jpg
+66,20240816.0,152429,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/not_complete/NG_20240816_152429.jpg
+67,20240816.0,152440,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/not_complete/NG_20240816_152440.jpg
+68,20240816.0,152541,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/not_complete/NG_20240816_152541.jpg
+69,20240816.0,152939,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/not_complete/NG_20240816_152939.jpg
+70,20240816.0,152946,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/not_complete/NG_20240816_152946.jpg
+71,20240816.0,153012,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/not_complete/NG_20240816_153012.jpg
