@@ -152,10 +152,10 @@ def stream_video(device):
             print("Tidak dapat membaca frame")
             break
         
-        results = model(frame, conf=0.1, max_det=2)
+        results = model(frame, conf=0.70, max_det=2)
 
         # Count occurrences of class 0
-        class_0_count = 0
+        hitung_yang_ok = 0
 
         for r in results:
             for box in r.boxes:
@@ -166,7 +166,7 @@ def stream_video(device):
 
                 # Check for class 0 and update the counter
                 if cls_id == 0:
-                    class_0_count += 1
+                    hitung_yang_ok += 1
 
                 # Get custom class name and color
                 label = f"{custom_names.get(cls_id, cls_id)}: {confidence:.2f}"
@@ -184,12 +184,12 @@ def stream_video(device):
                 cv2.putText(frame, label, (x1, label_ymin - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
         # Execute function A or B based on the count of class 0
-        if class_0_count >= 2:
+        if hitung_yang_ok >= 2:
             function_A()
         else:
             function_B()
                
-        # Resize the frame for lighter display
+        ########## proses resize frame untuk dikirim ke client ###########
         frame_width = 1280
         frame_height = 720
         annotated_frame = cv2.resize(frame, (int(frame_width * (810 / frame_height)), 810))
@@ -198,27 +198,27 @@ def stream_video(device):
         ret, buffer = cv2.imencode('.jpg', annotated_frame)
         frame = buffer.tobytes()
         
-        # Read Arduino data
-        # baca_data_arduino()
+        ########### baca data serial pada arduino #############
+        baca_data_arduino()
         
         print ("flag status", resetInspectionFlag, inspectionFlag)
         
-        # If inspection is triggered
+        ########## Kondidional untuk handle proses inspeksi ###########
         if inspectionFlag and resetInspectionFlag:
             print("ini didalam if scann")
             for r in results:
                 detected_object = len(r.boxes.cls)
-                if detected_object:
+                if detected_object and hitung_yang_ok >= 2:
                     bearing_detected = True
-                    save_image(annotated_frame, 'GOOD', 'Deteksi_oke')
+                    save_image(annotated_frame, 'GOOD', 'bearing_complete')
                     print(f'Detected object: {detected_object}')
                     latest_frame = frame
                     kirim_data_ke_arduino("out_ok")
                     resetInspectionFlag = False
                 else:
                     bearing_detected = False
-                    print('No bearing object detected')
-                    save_image(annotated_frame, 'NG', 'Tidak_terdeteksi')
+                    print('Bearing not completed yet')
+                    save_image(annotated_frame, 'NG', 'not_complete')
                     latest_frame = frame
                     kirim_data_ke_arduino("out_ng")
                     resetInspectionFlag = False
