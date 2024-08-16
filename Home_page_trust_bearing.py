@@ -27,7 +27,21 @@ updateData = {'total_judges': 0,
               'arduino_connected': False,
               }
 
+#load ypur yolo models from
 model = YOLO("./models/model1yolov10n.pt")
+
+# Class names (replace with your custom names)
+custom_names = {0: "OK", 1: "NG"}  # Update with your actual class IDs and custom names
+
+# Custom colors for each class
+custom_colors = {0: (0, 255, 0), 1: (0, 0, 255)}  # Green for Class 1, Red for Class 2
+
+def function_A():
+    print("Function A executed")
+
+def function_B():
+    print("Function B executed")
+
 
 ############## function untuk arduino communication #########
 def init_serial_connection():
@@ -101,7 +115,7 @@ def kirim_data_ke_arduino(data):
 
 ############## end of function untuk arduino communication #########
     
-    
+
 
 ############## function untuk stream frame ke client ################
 def stream_video(device):
@@ -131,36 +145,67 @@ def stream_video(device):
     frame_width = int((frame_height / 9) * 16)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
+    
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             print("Tidak dapat membaca frame")
             break
-        results = model(frame, conf=0.1, max_det=2)
-        annotated_frame = results[0].plot()
-                    
-        # dibawah ini logika untuk memperkecil ukuran frame agar ringan saat di show up
-        #Set frame width and height for 16:9 aspect ratio and 1080p resolution
-        frame_width = 1280
-        frame_height = 720  # Initial frame height for 16:9 aspect ratio and 720p resolution
-
-        # Calculate the frame width based on the aspect ratio
-        frame_width = int((frame_height / 9) * 16)
-        annotated_frame = cv2.resize(annotated_frame, (int(frame_width * (810 / frame_height)), 810))
         
-        #encoding gambar yang akan di kirim  menjadi jpg
+        results = model(frame, conf=0.1, max_det=2)
+
+        # Count occurrences of class 0
+        class_0_count = 0
+
+        for r in results:
+            for box in r.boxes:
+                # Extract box information
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                cls_id = int(box.cls[0])
+                confidence = box.conf[0]
+
+                # Check for class 0 and update the counter
+                if cls_id == 0:
+                    class_0_count += 1
+
+                # Get custom class name and color
+                label = f"{custom_names.get(cls_id, cls_id)}: {confidence:.2f}"
+                color = custom_colors.get(cls_id, (255, 255, 255))  # Default to white if class not found
+
+                # Draw the bounding box
+                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+
+                # Draw the label background
+                label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)
+                label_ymin = max(y1, label_size[1] + 10)
+                cv2.rectangle(frame, (x1, label_ymin - label_size[1] - 10), (x1 + label_size[0], label_ymin + 5), color, cv2.FILLED)
+
+                # Put the label text on the frame
+                cv2.putText(frame, label, (x1, label_ymin - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+
+        # Execute function A or B based on the count of class 0
+        if class_0_count >= 2:
+            function_A()
+        else:
+            function_B()
+               
+        # Resize the frame for lighter display
+        frame_width = 1280
+        frame_height = 720
+        annotated_frame = cv2.resize(frame, (int(frame_width * (810 / frame_height)), 810))
+        
+        # Encode the frame to JPEG format
         ret, buffer = cv2.imencode('.jpg', annotated_frame)
         frame = buffer.tobytes()
         
-        #read arduino data serial
-        baca_data_arduino()
+        # Read Arduino data
+        # baca_data_arduino()
         
         print ("flag status", resetInspectionFlag, inspectionFlag)
-        #jika trigger untuk deteksi on
+        
+        # If inspection is triggered
         if inspectionFlag and resetInspectionFlag:
             print("ini didalam if scann")
-        # logika untuk mendapatkan data object yang di deteksi
-        #kemudian perbarui nilai di global variabel bearing_detected
             for r in results:
                 detected_object = len(r.boxes.cls)
                 if detected_object:
@@ -174,21 +219,19 @@ def stream_video(device):
                     bearing_detected = False
                     print('No bearing object detected')
                     save_image(annotated_frame, 'NG', 'Tidak_terdeteksi')
-                    print(f'Detected object: {detected_object}')
                     latest_frame = frame
                     kirim_data_ke_arduino("out_ng")
                     resetInspectionFlag = False
             
             update_data_dict('last_judgement', bearing_detected)
-            update_data_dict('sesion_judges', updateData['sesion_judges']+1)
+            update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
       
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
     cap.release()
     cv2.destroyAllWindows()
-
-
+    
 ############## Function untuk start inspection #################
 def start_inspection():
     global inspectionFlag
