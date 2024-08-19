@@ -268,6 +268,7 @@ def save_image(images_to_save, raw_file_name, image_category):
     
     # Update judgment.csv file with the new data.
     function_update_csv(image_path, file_name)
+    return downloads_directory
     
 
 def function_update_csv(pathImg, filename):
