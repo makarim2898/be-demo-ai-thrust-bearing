@@ -5,6 +5,7 @@ import time
 import cv2
 import pandas as pd
 import numpy as np
+import os
 
 collectSample = Blueprint('collectSample_routes', __name__)
 CORS(collectSample)
@@ -94,6 +95,16 @@ def readCameraIndex():
     id_camera = idx_cam_1
     return id_camera
 
+#################### hitung banyaknya file yang ada di direktory #####################
+def count_files(directory):
+    try:
+        # List semua item dalam direktori
+        items = os.listdir(directory)
+        # Hitung berapa banyak item yang merupakan file
+        file_count = sum([1 for item in items if os.path.isfile(os.path.join(directory, item))])
+        return file_count
+    except FileNotFoundError:
+        return "Direktori tidak ditemukan."
 
 #################### END POINT #####################
 #============= Show Live Video ==============#
@@ -114,13 +125,20 @@ def home_show_last():
 @collectSample.route('/collect/save-sample', methods=['GET'])
 def save_sample():
     global saved_frame, last_frame
-    namafile = request.args.get('namafile', default='sample')
-    folder = request.args.get('folder', default='sample')
-    hptb.save_image(last_frame, namafile, folder)
+    namafile = request.args.get('name', default='sample')
+    folder = request.args.get('dir', default=namafile)
+    imgPath = hptb.save_image(last_frame, namafile, folder)
     saved_frame = last_frame
     ret, buffer = cv2.imencode('.jpg', last_frame)
+    
+    # Update saved frame to the latest frame
     saved_frame = buffer.tobytes()
-    return jsonify({'message': 'Sample saved'})
+    
+    #hitung jumlah file didalam direktori
+    filecount = count_files(imgPath)
+    return jsonify({'message': 'Sample saved',
+                    'img_path': imgPath,
+                    'count_file' : filecount})
 
 #============= test controller ==============#
 @collectSample.route('/collect/tipu', methods=['GET'])
