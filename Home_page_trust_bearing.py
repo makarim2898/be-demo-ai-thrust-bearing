@@ -18,9 +18,9 @@ inspectionFlag = False
 bearing_detected = False
 resetInspectionFlag = True
 
-
 #definisi variabel global untuk
 latest_frame = None
+
 updateData = {'total_judges': 0,
               'sesion_judges': 0,
               'trigger_start': 0,
@@ -117,6 +117,12 @@ def baca_data_arduino_thread():
         print("Reading arduino serial")
         baca_data_arduino()
 
+def updateVariabelGlobal():
+    global inspectionFlag, resetInspectionFlag
+    x = inspectionFlag
+    y = resetInspectionFlag
+    print("#"*500)
+    return x, y
 # Menginisialisasi thread di luar fungsi stream_video
 arduino_thread = threading.Thread(target=baca_data_arduino_thread)
 arduino_thread.daemon = True
@@ -234,9 +240,7 @@ def stream_video(device):
 
     cap.release()
     cv2.destroyAllWindows()
-    
-    
-    
+   
 ############## Function untuk start inspection #################
 def start_inspection():
     global inspectionFlag
