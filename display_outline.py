@@ -126,7 +126,7 @@ def stream_video(device):
         print ("flag status", inspectionFlag, resetInspectionFlag)
         
         ########## Kondidional untuk handle proses inspeksi ###########
-        if inspectionFlag and resetInspectionFlag:
+        if inspectionFlag:
             print("ini didalam if scann")
             for r in results:
                 detected_object = len(r.boxes.cls)
@@ -135,16 +135,15 @@ def stream_video(device):
                     save_image(annotated_frame, 'GOOD', 'bearing_complete')
                     print(f'Detected object: {detected_object}')
                     latest_frame = frame
-                    resetInspectionFlag = False
                 else:
                     bearing_detected = False
                     print('Bearing not completed yet')
                     save_image(annotated_frame, 'NG', 'not_complete')
                     latest_frame = frame
-                    resetInspectionFlag = False
             
             update_data_dict('last_judgement', bearing_detected)
             update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
+            inspectionFlag = False
       
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
@@ -267,7 +266,7 @@ def get_data():
     # data = {'bearing_detected': bearing_detected}
     return jsonify(data)
 
-@display_outline.route('/outline/start', methods=['GET'])
+@display_outline.route('/outline/start-scan', methods=['GET'])
 def startInspection():
     start_inspection()
-    return "sucess startingspection"
+    return jsonify("sucess starting inspection")
