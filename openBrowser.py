@@ -5,7 +5,7 @@ import os
 def openBrowser():
     # Path relatif ke file HTML
     #/home/komputer/Desktop/thrust_bearing_app/frontend/html-old/Home-page/Homepage.html
-    relative_path = '../frontend/html-old/Home-page/Homepage.html'
+    relative_path = '../frontend/html-old/display-page-outline/display-page-outline.html'
 
     # Mengubah path relatif menjadi path absolut
     file_path = os.path.abspath(relative_path)
