@@ -39,18 +39,127 @@ custom_names = {0: "OK",
 custom_colors = {0: (0, 255, 0), 
                  1: (0, 0, 255)}  # Green for Class 1, Red for Class 2
 
-def updateVariabelGlobal():
-    global inspectionFlag, resetInspectionFlag
-    x = inspectionFlag
-    y = resetInspectionFlag
-    print("#"*500)
-    return x, y
-
 ############## function untuk stream frame ke client ################
+# def stream_video(device):
+#     global latest_frame, bearing_detected, inspectionFlag, updateData, resetInspectionFlag
+#     time.sleep(2)
+#     cap = cv2.VideoCapture(device)
+#     if not cap.isOpened():
+#         # Generate a placeholder frame with error message
+#         error_frame = np.zeros((500, 800, 3), np.uint8)
+#         pesan_string = f'''Camera index {device} out of range
+#                             Silahkan tekan Refresh Camera atau Halaman Web
+#                             jika masih berlanjut Lepas pasang USB pada Camera
+#                             jika masih error lambaikan tangan pada kamera'''
+#         cv2.putText(error_frame, pesan_string, (50, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+#         ret, buffer = cv2.imencode('.jpg', error_frame)
+#         error_frame = buffer.tobytes()
+        
+#         yield (b'--frame\r\n'
+#                    b'Content-Type: image/jpeg\r\n\r\n' + error_frame + b'\r\n')
+    
+#     # Set frame width and height for 16:9 aspect ratio and 1080p resolution
+#     frame_width = 480
+#     frame_height = 240 # Initial frame height for 16:9 aspect ratio and 720p resolution
+
+#     # Calculate the frame width based on the aspect ratio
+#     frame_width = int((frame_height / 9) * 16)
+#     cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
+#     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
+    
+#     while cap.isOpened():
+#         ret, frame = cap.read()
+#         if not ret:
+#             print("Tidak dapat membaca frame")
+#             break
+        
+#         results = model(frame, conf=0.60, max_det=2)
+
+#         # Count occurrences of class 0
+#         hitung_yang_ok = 0
+
+#         for r in results:
+#             for box in r.boxes:
+#                 # Extract box information
+#                 x1, y1, x2, y2 = map(int, box.xyxy[0])
+#                 cls_id = int(box.cls[0])
+#                 confidence = box.conf[0]
+
+#                 # Check for class 0 and update the counter
+#                 if cls_id == 0:
+#                     hitung_yang_ok += 1
+
+#                 # Get custom class name and color
+#                 label = f"{custom_names.get(cls_id, cls_id)}: {confidence:.2f}"
+#                 color = custom_colors.get(cls_id, (255, 255, 255))  # Default to white if class not found
+
+#                 # Draw the bounding box
+#                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+
+#                 # Draw the label background
+#                 label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)
+#                 label_ymin = max(y1, label_size[1] + 10)
+#                 cv2.rectangle(frame, (x1, label_ymin - label_size[1] - 10), (x1 + label_size[0], label_ymin + 5), color, cv2.FILLED)
+
+#                 # Put the label text on the frame
+#                 cv2.putText(frame, label, (x1, label_ymin - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+
+#         ########## proses resize frame untuk dikirim ke client ###########
+#         frame_width = 1280
+#         frame_height = 720
+#         annotated_frame = cv2.resize(frame, (int(frame_width * (810 / frame_height)), 810))
+        
+#         # Encode the frame to JPEG format
+#         ret, buffer = cv2.imencode('.jpg', annotated_frame)
+#         frame = buffer.tobytes()
+        
+#         ########### baca data serial pada arduino #############
+#         # baca_data_arduino()
+        
+#         print ("flag status", inspectionFlag, resetInspectionFlag)
+        
+#         ########## Kondidional untuk handle proses inspeksi ###########
+#         if inspectionFlag:
+#             print("ini didalam if scann")
+#             for r in results:
+#                 detected_object = len(r.boxes.cls)
+#                 if detected_object and hitung_yang_ok >= 2:
+#                     bearing_detected = True
+#                     save_image(annotated_frame, 'GOOD', 'bearing_complete')
+#                     print(f'Detected object: {detected_object}')
+#                     latest_frame = frame
+#                 else:
+#                     bearing_detected = False
+#                     print('Bearing not completed yet')
+#                     save_image(annotated_frame, 'NG', 'not_complete')
+#                     latest_frame = frame
+            
+#             update_data_dict('last_judgement', bearing_detected)
+#             update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
+#             inspectionFlag = False
+      
+#         yield (b'--frame\r\n'
+#                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+#     cap.release()
+#     cv2.destroyAllWindows()
+
 def stream_video(device):
     global latest_frame, bearing_detected, inspectionFlag, updateData, resetInspectionFlag
     time.sleep(2)
+
+    # Retry mechanism
+    max_retry = 5
+    retry_count = 0
+
     cap = cv2.VideoCapture(device)
+
+    while not cap.isOpened() and retry_count < max_retry:
+        print(f"Retrying camera connection... attempt {retry_count + 1}")
+        cap = cv2.VideoCapture(device)
+        time.sleep(2)
+        retry_count += 1
+
     if not cap.isOpened():
         # Generate a placeholder frame with error message
         error_frame = np.zeros((500, 800, 3), np.uint8)
@@ -63,71 +172,64 @@ def stream_video(device):
         error_frame = buffer.tobytes()
         
         yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + error_frame + b'\r\n')
-    
-    # Set frame width and height for 16:9 aspect ratio and 1080p resolution
-    frame_width = 720
-    frame_height = 480  # Initial frame height for 16:9 aspect ratio and 720p resolution
+               b'Content-Type: image/jpeg\r\n\r\n' + error_frame + b'\r\n')
 
-    # Calculate the frame width based on the aspect ratio
+    frame_width = 480
+    frame_height = 240
+
     frame_width = int((frame_height / 9) * 16)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
-    
-    while cap.isOpened():
+
+    while True:
+        if not cap.isOpened():
+            print("Reinitializing camera...")
+            cap.release()
+            cap = cv2.VideoCapture(device)
+            time.sleep(2)
+            continue
+
         ret, frame = cap.read()
         if not ret:
-            print("Tidak dapat membaca frame")
-            break
-        
-        results = model(frame, conf=0.70, max_det=2)
+            print("Tidak dapat membaca frame, mencoba ulang...")
+            cap.release()
+            cap = cv2.VideoCapture(device)
+            time.sleep(2)
+            continue
 
-        # Count occurrences of class 0
+        results = model(frame, conf=0.60, max_det=2)
+
         hitung_yang_ok = 0
-
         for r in results:
             for box in r.boxes:
-                # Extract box information
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
                 cls_id = int(box.cls[0])
                 confidence = box.conf[0]
 
-                # Check for class 0 and update the counter
                 if cls_id == 0:
                     hitung_yang_ok += 1
 
-                # Get custom class name and color
                 label = f"{custom_names.get(cls_id, cls_id)}: {confidence:.2f}"
-                color = custom_colors.get(cls_id, (255, 255, 255))  # Default to white if class not found
+                color = custom_colors.get(cls_id, (255, 255, 255))
 
-                # Draw the bounding box
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
-                # Draw the label background
                 label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)
                 label_ymin = max(y1, label_size[1] + 10)
                 cv2.rectangle(frame, (x1, label_ymin - label_size[1] - 10), (x1 + label_size[0], label_ymin + 5), color, cv2.FILLED)
-
-                # Put the label text on the frame
                 cv2.putText(frame, label, (x1, label_ymin - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
-        ########## proses resize frame untuk dikirim ke client ###########
         frame_width = 1280
         frame_height = 720
         annotated_frame = cv2.resize(frame, (int(frame_width * (810 / frame_height)), 810))
         
-        # Encode the frame to JPEG format
         ret, buffer = cv2.imencode('.jpg', annotated_frame)
         frame = buffer.tobytes()
+
+        print("flag status", inspectionFlag, resetInspectionFlag)
         
-        ########### baca data serial pada arduino #############
-        # baca_data_arduino()
-        
-        print ("flag status", inspectionFlag, resetInspectionFlag)
-        
-        ########## Kondidional untuk handle proses inspeksi ###########
         if inspectionFlag:
-            print("ini didalam if scann")
+            print("Ini didalam if scann")
             for r in results:
                 detected_object = len(r.boxes.cls)
                 if detected_object and hitung_yang_ok >= 2:
@@ -150,7 +252,7 @@ def stream_video(device):
 
     cap.release()
     cv2.destroyAllWindows()
-   
+
 ############## Function untuk start inspection #################
 def start_inspection():
     global inspectionFlag
@@ -260,9 +362,9 @@ def home_show_last():
 
 @display_outline.route('/outline/get-data', methods=['GET'])
 def get_data():
-    global bearing_detected
+    global updateData
     data = updateData
-    print(data['total_judges'])
+    # print(data['total_judges'])
     # data = {'bearing_detected': bearing_detected}
     return jsonify(data)
 
