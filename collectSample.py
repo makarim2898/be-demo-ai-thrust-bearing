@@ -20,6 +20,7 @@ def stream_video(device):
     global last_frame
     time.sleep(2)
     cap = cv2.VideoCapture(device)
+    time.sleep(2)
     if not cap.isOpened():
         # Generate a placeholder frame with error message
         error_frame = np.zeros((500, 800, 3), np.uint8)
@@ -34,16 +35,16 @@ def stream_video(device):
         yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + error_frame + b'\r\n')
     
-    if not hptb.arduino_thread.is_alive():
-        hptb.arduino_thread.start()
+    # if not hptb.arduino_thread.is_alive():
+    #     hptb.arduino_thread.start()
     # Set frame width and height for 16:9 aspect ratio and 1080p resolution
-    frame_width = 720
-    frame_height = 480  # Initial frame height for 16:9 aspect ratio and 720p resolution
+    # frame_width = 720
+    # frame_height = 480  # Initial frame height for 16:9 aspect ratio and 720p resolution
 
-    # Calculate the frame width based on the aspect ratio
-    frame_width = int((frame_height / 9) * 16)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
+    # # Calculate the frame width based on the aspect ratio
+    # frame_width = int((frame_height / 9) * 16)
+    # cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
+    # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
     
     while cap.isOpened():
         ret, frame = cap.read()
@@ -51,14 +52,10 @@ def stream_video(device):
             print("Tidak dapat membaca frame")
             break
         
-        ########## proses resize frame untuk dikirim ke client ###########
-        frame_width = 1280
-        frame_height = 720
-        annotated_frame = cv2.resize(frame, (int(frame_width * (810 / frame_height)), 810))
-        last_frame = annotated_frame
+        last_frame =frame
         
         # Encode the frame to JPEG format
-        ret, buffer = cv2.imencode('.jpg', annotated_frame)
+        ret, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
         
         ########### baca data serial pada arduino #############
@@ -113,7 +110,7 @@ def show_video():
     id_camera = readCameraIndex()
     print(f"====================  {id_camera}  ====================")
     print(f'Settings show video with camera index {id_camera}')
-    return Response(stream_video(0), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(stream_video(id_camera), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 #============= Show last images ==============#
 @collectSample.route('/collect/last_detections', methods=['GET'])
