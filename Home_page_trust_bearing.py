@@ -19,7 +19,7 @@ bearing_detected = False
 resetInspectionFlag = True
 detections_enable = False
 frameCount = 0 #untuk menghitung frame yang telah di cek
-frameLimiter = 30 #batasan maksimal frame yang di cek 
+frameLimiter = 90 #batasan maksimal frame yang di cek 
 #definisi variabel global untuk
 latest_frame = None
 
