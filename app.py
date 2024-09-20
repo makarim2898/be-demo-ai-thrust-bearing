@@ -1,9 +1,10 @@
+import os
 from flask import Flask
 from flask_cors import CORS
 from settings_function import settings
 from Home_page_trust_bearing import home_bearing
 from information import information
-from openBrowser import openBrowser
+# from openBrowser import openBrowser
 from collectSample import collectSample
 from display_outline import display_outline
 
@@ -21,4 +22,3 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True)
-    openBrowser()  # Membuka browser dengan halaman utama Badan Anda Bau
