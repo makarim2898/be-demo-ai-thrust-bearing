@@ -17,7 +17,9 @@ CORS(home_bearing)
 inspectionFlag = False
 bearing_detected = False
 resetInspectionFlag = True
-
+detections_enable = False
+frameCount = 0 #untuk menghitung frame yang telah di cek
+frameLimiter = 30 #batasan maksimal frame yang di cek 
 #definisi variabel global untuk
 latest_frame = None
 
@@ -124,18 +126,29 @@ def updateVariabelGlobal():
     print("#"*500)
     return x, y
 # Menginisialisasi thread di luar fungsi stream_video
+#========== coba hentikan thread dulu
 arduino_thread = threading.Thread(target=baca_data_arduino_thread)
 arduino_thread.daemon = True
 
 ############## end of function untuk arduino communication #########
-    
-
 
 ############## function untuk stream frame ke client ################
 def stream_video(device):
     global latest_frame, bearing_detected, inspectionFlag, updateData, resetInspectionFlag
     time.sleep(2)
+
+    # Retry mechanism
+    max_retry = 5
+    retry_count = 0
+
     cap = cv2.VideoCapture(device)
+
+    while not cap.isOpened() and retry_count < max_retry:
+        print(f"Retrying camera connection... attempt {retry_count + 1}")
+        cap = cv2.VideoCapture(device)
+        time.sleep(2)
+        retry_count += 1
+
     if not cap.isOpened():
         # Generate a placeholder frame with error message
         error_frame = np.zeros((500, 800, 3), np.uint8)
@@ -148,98 +161,98 @@ def stream_video(device):
         error_frame = buffer.tobytes()
         
         yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + error_frame + b'\r\n')
-    
+               b'Content-Type: image/jpeg\r\n\r\n' + error_frame + b'\r\n')
+
     if not arduino_thread.is_alive():
         arduino_thread.start()
-    # Set frame width and height for 16:9 aspect ratio and 1080p resolution
-    frame_width = 720
-    frame_height = 480  # Initial frame height for 16:9 aspect ratio and 720p resolution
 
-    # Calculate the frame width based on the aspect ratio
+    frame_width = 480
+    frame_height = 240
+
     frame_width = int((frame_height / 9) * 16)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
-    
-    while cap.isOpened():
+
+    while True:
+        if not cap.isOpened():
+            print("Reinitializing camera...")
+            cap.release()
+            cap = cv2.VideoCapture(device)
+            time.sleep(2)
+            continue
+
         ret, frame = cap.read()
         if not ret:
-            print("Tidak dapat membaca frame")
-            break
-        
-        results = model(frame, conf=0.70, max_det=2)
+            print("Tidak dapat membaca frame, mencoba ulang...")
+            cap.release()
+            cap = cv2.VideoCapture(device)
+            time.sleep(2)
+            continue
 
-        # Count occurrences of class 0
+        results = model(frame, conf=0.60, max_det=2)
+
         hitung_yang_ok = 0
-
         for r in results:
             for box in r.boxes:
-                # Extract box information
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
                 cls_id = int(box.cls[0])
                 confidence = box.conf[0]
 
-                # Check for class 0 and update the counter
                 if cls_id == 0:
                     hitung_yang_ok += 1
 
-                # Get custom class name and color
                 label = f"{custom_names.get(cls_id, cls_id)}: {confidence:.2f}"
-                color = custom_colors.get(cls_id, (255, 255, 255))  # Default to white if class not found
+                color = custom_colors.get(cls_id, (255, 255, 255))
 
-                # Draw the bounding box
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
-                # Draw the label background
                 label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)
                 label_ymin = max(y1, label_size[1] + 10)
                 cv2.rectangle(frame, (x1, label_ymin - label_size[1] - 10), (x1 + label_size[0], label_ymin + 5), color, cv2.FILLED)
-
-                # Put the label text on the frame
                 cv2.putText(frame, label, (x1, label_ymin - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
-        ########## proses resize frame untuk dikirim ke client ###########
         frame_width = 1280
         frame_height = 720
         annotated_frame = cv2.resize(frame, (int(frame_width * (810 / frame_height)), 810))
         
-        # Encode the frame to JPEG format
         ret, buffer = cv2.imencode('.jpg', annotated_frame)
         frame = buffer.tobytes()
-        
-        ########### baca data serial pada arduino #############
+
+        print("flag status: inspection, resetInspect", inspectionFlag, resetInspectionFlag)
         # baca_data_arduino()
-        
-        print ("flag status", inspectionFlag, resetInspectionFlag)
-        
-        ########## Kondidional untuk handle proses inspeksi ###########
+
         if inspectionFlag and resetInspectionFlag:
-            print("ini didalam if scann")
+            global frameLimiter, frameCount
+            frameCount += 1
+            print(f"memulai pengecekan frame ke {frameCount}, batasnya adalah {frameLimiter} frame")
             for r in results:
                 detected_object = len(r.boxes.cls)
-                if detected_object and hitung_yang_ok >= 2:
+                if detected_object and hitung_yang_ok >= 2 :
+                    latest_frame = frame
                     bearing_detected = True
+                    resetInspectionFlag = False
+                    inspectionFlag = False
                     save_image(annotated_frame, 'GOOD', 'bearing_complete')
                     print(f'Detected object: {detected_object}')
-                    latest_frame = frame
-                    kirim_data_ke_arduino("out_ok")
-                    resetInspectionFlag = False
-                else:
+                elif frameCount%frameLimiter == 0:
                     bearing_detected = False
+                    resetInspectionFlag = False
+                    inspectionFlag = False
                     print('Bearing not completed yet')
                     save_image(annotated_frame, 'NG', 'not_complete')
                     latest_frame = frame
-                    kirim_data_ke_arduino("out_ng")
-                    resetInspectionFlag = False
             
             update_data_dict('last_judgement', bearing_detected)
             update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
+            inspectionFlag = False
       
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
     cap.release()
     cv2.destroyAllWindows()
+
+
    
 ############## Function untuk start inspection #################
 def start_inspection():
