@@ -234,6 +234,9 @@ def stream_video(device):
                     inspectionFlag = False
                     save_image(annotated_frame, 'GOOD', 'bearing_complete')
                     print(f'Detected object: {detected_object}')
+                    update_data_dict('last_judgement', bearing_detected)
+                    update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
+
                 elif frameCount%frameLimiter == 0:
                     bearing_detected = False
                     resetInspectionFlag = False
@@ -241,9 +244,9 @@ def stream_video(device):
                     print('Bearing not completed yet')
                     save_image(annotated_frame, 'NG', 'not_complete')
                     latest_frame = frame
-            
-            update_data_dict('last_judgement', bearing_detected)
-            update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
+                    update_data_dict('last_judgement', bearing_detected)
+                    update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
+
             inspectionFlag = False
       
         yield (b'--frame\r\n'
