@@ -1,3 +1,7 @@
 inspection_id,inspection_date,inspection_time,inspection_result,image_path
 1,20240808.0,185813,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/Deteksi_oke/GOOD_20240808_185813.jpg
-/Downloads/bearing_complete/GOOD_20240920_154854.jpg
+2,20240920.0,155649,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240920_155649.jpg
+3,20240920.0,155743,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240920_155743.jpg
+4,20240920.0,155833,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240920_155833.jpg
+5,20240920.0,155923,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240920_155923.jpg
+6,20240920.0,160129,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240920_160129.jpg
