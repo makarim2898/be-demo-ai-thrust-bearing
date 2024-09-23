@@ -745,3 +745,10 @@ inspection_id,inspection_date,inspection_time,inspection_result,image_path
 744,20240923.0,144424,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240923_144424.jpg
 745,20240923.0,144719,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240923_144719.jpg
 746,20240923.0,144820,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240923_144820.jpg
+747,20240923.0,145012,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240923_145012.jpg
+748,20240923.0,145121,NG,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/not_complete/NG_20240923_145121.jpg
+749,20240923.0,145216,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240923_145216.jpg
+750,20240923.0,145304,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240923_145304.jpg
+751,20240923.0,145406,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240923_145406.jpg
+752,20240923.0,145508,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240923_145508.jpg
+753,20240923.0,145613,GOOD,/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20240923_145613.jpg
