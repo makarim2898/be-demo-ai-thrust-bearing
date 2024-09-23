@@ -236,6 +236,7 @@ def stream_video(device):
                     print(f'Detected object: {detected_object}')
                     update_data_dict('last_judgement', bearing_detected)
                     update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
+                    kirim_data_ke_arduino("out_ok")
 
                 elif frameCount%frameLimiter == 0:
                     bearing_detected = False
@@ -246,6 +247,7 @@ def stream_video(device):
                     latest_frame = frame
                     update_data_dict('last_judgement', bearing_detected)
                     update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
+                    kirim_data_ke_arduino("out_ng")
 
             inspectionFlag = False
       
