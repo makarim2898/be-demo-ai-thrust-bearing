@@ -20,7 +20,7 @@ resetInspectionFlag = True
 detections_enable = False
 
 frameCount = 0 #untuk menghitung frame yang telah di cek
-frameLimiter = 60 #batasan maksimal frame yang di cek
+frameLimiter = 30 #batasan maksimal frame yang di cek
 frameDelay = 15 #batasan waktu untuk memulai cek NG
 frameDelayDone = False
 
@@ -142,6 +142,8 @@ arduino_thread.daemon = True
 ############## function untuk stream frame ke client ################
 def stream_video(device):
     global latest_frame, bearing_detected, inspectionFlag, updateData, resetInspectionFlag
+    global frameLimiter, frameCount, buffer_frame_NG1, buffer_frame_NG2, buffer_frame_NG3
+    global frameDelay, frameDelayDone
     time.sleep(2)
 
     # Retry mechanism
@@ -187,7 +189,7 @@ def stream_video(device):
             cap = cv2.VideoCapture(device)
             time.sleep(2)
             continue
-
+        
         ret, frame = cap.read()
         if not ret:
             print("Tidak dapat membaca frame, mencoba ulang...")
@@ -195,31 +197,32 @@ def stream_video(device):
             cap = cv2.VideoCapture(device)
             time.sleep(2)
             continue
+        
+        if inspectionFlag and resetInspectionFlag:
+            results = model(frame, conf=0.60, max_det=2)
 
-        results = model(frame, conf=0.60, max_det=2)
+            hitung_yang_ok = 0
+            hitung_yang_ng = 0
+            for r in results:
+                for box in r.boxes:
+                    x1, y1, x2, y2 = map(int, box.xyxy[0])
+                    cls_id = int(box.cls[0])
+                    confidence = box.conf[0]
 
-        hitung_yang_ok = 0
-        hitung_yang_ng = 0
-        for r in results:
-            for box in r.boxes:
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
-                cls_id = int(box.cls[0])
-                confidence = box.conf[0]
+                    if cls_id == 0:
+                        hitung_yang_ok += 1
+                    elif cls_id == 1:
+                        hitung_yang_ng += 1
 
-                if cls_id == 0:
-                    hitung_yang_ok += 1
-                elif cls_id == 1:
-                    hitung_yang_ng += 1
+                    label = f"{custom_names.get(cls_id, cls_id)}: {confidence:.2f}"
+                    color = custom_colors.get(cls_id, (255, 255, 255))
 
-                label = f"{custom_names.get(cls_id, cls_id)}: {confidence:.2f}"
-                color = custom_colors.get(cls_id, (255, 255, 255))
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
-                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-
-                label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)
-                label_ymin = max(y1, label_size[1] + 10)
-                cv2.rectangle(frame, (x1, label_ymin - label_size[1] - 10), (x1 + label_size[0], label_ymin + 5), color, cv2.FILLED)
-                cv2.putText(frame, label, (x1, label_ymin - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+                    label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)
+                    label_ymin = max(y1, label_size[1] + 10)
+                    cv2.rectangle(frame, (x1, label_ymin - label_size[1] - 10), (x1 + label_size[0], label_ymin + 5), color, cv2.FILLED)
+                    cv2.putText(frame, label, (x1, label_ymin - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
         # frame_width = 1280
         # frame_height = 720
@@ -233,74 +236,72 @@ def stream_video(device):
         # baca_data_arduino()
 
         if inspectionFlag and resetInspectionFlag:
-            global frameLimiter, frameCount, buffer_frame_NG1, buffer_frame_NG2, buffer_frame_NG3
-            global frameDelay, frameDelayDone
             frameCount += 1
 
             if frameCount%frameDelay == 0:
                 frameDelayDone = True
 
             print(f"memulai pengecekan frame ke {frameCount}, batasnya adalah {frameLimiter} frame")
-            for r in results:
-                detected_object = len(r.boxes.cls)
+            # for r in results:
+            #     detected_object = len(r.boxes.cls)
 
-                #GOOD ketika ada 2 object dan semuanya OK
-                if detected_object and hitung_yang_ok >= 2 :
+            #GOOD ketika ada 2 object dan semuanya OK
+            if  hitung_yang_ok >= 2 :
+                latest_frame = frame
+                bearing_detected = True
+                resetInspectionFlag = False
+                inspectionFlag = False
+                frameDelayDone = False
+                kirim_data_ke_arduino("out_ok")
+                save_image(annotated_frame, 'GOOD', 'bearing_complete')
+                # print(f'Detected object: {detected_object}')
+                update_data_dict('last_judgement', bearing_detected)
+                update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
+            
+            #NG ketika terdeteksi no bearing dan bearing ok
+            elif buffer_frame_NG1 is None and hitung_yang_ok > 0 and hitung_yang_ng > 0 and frameCount%frameLimiter != 0 and frameDelayDone:
+                buffer_frame_NG1 = frame
+                print("================ ng1") 
+
+            #NG Ketika terdeteksi no_bearing
+            elif buffer_frame_NG2 is None and hitung_yang_ng > 0 and frameCount%frameLimiter != 0 and frameDelayDone:
+                print("================= ng2")
+                buffer_frame_NG2 = frame
+
+            #NG ketika terdeteksi 1 bearing saja
+            elif buffer_frame_NG1 is None and hitung_yang_ok == 1 and frameCount%frameLimiter != 0 and frameDelayDone: 
+                buffer_frame_NG3 = frame
+                print("================= ng3")
+
+            #salin frame NG ke latest frame
+            elif frameCount%frameLimiter == 0:
+
+                #salin frame NG ke latest frame berdasar prioritas
+                if buffer_frame_NG1:
+                    latest_frame = buffer_frame_NG1
+                elif buffer_frame_NG2:
+                    latest_frame = buffer_frame_NG2
+                elif buffer_frame_NG3 :
+                    latest_frame = buffer_frame_NG3
+                else :
                     latest_frame = frame
-                    bearing_detected = True
-                    resetInspectionFlag = False
-                    inspectionFlag = False
-                    frameDelayDone = False
-                    kirim_data_ke_arduino("out_ok")
-                    save_image(annotated_frame, 'GOOD', 'bearing_complete')
-                    print(f'Detected object: {detected_object}')
-                    update_data_dict('last_judgement', bearing_detected)
-                    update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
+
+                #kosongkan buffer frame untuk next detection
+                buffer_frame_NG1 = None
+                buffer_frame_NG2 = None
+                buffer_frame_NG3 = None
+
+                #setting flag menjadi false agar tidak looping
+                bearing_detected = False
+                resetInspectionFlag = False
+                inspectionFlag = False
+                frameDelayDone = False
                 
-                #NG ketika terdeteksi no bearing dan bearing ok
-                elif buffer_frame_NG1 == None and hitung_yang_ok > 0 and hitung_yang_ng > 0 and frameCount%frameLimiter != 0 and frameDelayDone:
-                    buffer_frame_NG1 = frame
-                    print("================ ng1") 
-
-                #NG Ketika terdeteksi no_bearing
-                elif buffer_frame_NG2 == None and hitung_yang_ng > 0 and frameCount%frameLimiter != 0 and frameDelayDone:
-                    print("================= ng2")
-                    buffer_frame_NG2 = frame
-
-                #NG ketika terdeteksi 1 bearing saja
-                elif buffer_frame_NG1 == None and hitung_yang_ok == 1 and frameCount%frameLimiter != 0 and frameDelayDone: 
-                    buffer_frame_NG3 = frame
-                    print("================= ng3")
-
-                #salin frame NG ke latest frame
-                elif frameCount%frameLimiter == 0:
-
-                    #salin frame NG ke latest frame berdasar prioritas
-                    if buffer_frame_NG1 != None:
-                        latest_frame = buffer_frame_NG1
-                    elif buffer_frame_NG2 != None:
-                        latest_frame = buffer_frame_NG2
-                    elif buffer_frame_NG3 != None:
-                        latest_frame = buffer_frame_NG3
-                    else :
-                        latest_frame = frame
-
-                    #kosongkan buffer frame untuk next detection
-                    buffer_frame_NG1 = None
-                    buffer_frame_NG2 = None
-                    buffer_frame_NG3 = None
-
-                    #setting flag menjadi false agar tidak looping
-                    bearing_detected = False
-                    resetInspectionFlag = False
-                    inspectionFlag = False
-                    frameDelayDone = False
-                    
-                    print('Bearing not completed yet')
-                    save_image(annotated_frame, 'NG', 'not_complete')
-                    update_data_dict('last_judgement', bearing_detected)
-                    update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
-                    kirim_data_ke_arduino("out_ng")
+                print('Bearing not completed yet')
+                save_image(annotated_frame, 'NG', 'not_complete')
+                update_data_dict('last_judgement', bearing_detected)
+                update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
+                kirim_data_ke_arduino("out_ng")
 
             inspectionFlag = False
       
