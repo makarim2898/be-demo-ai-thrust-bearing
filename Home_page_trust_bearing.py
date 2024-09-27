@@ -20,15 +20,19 @@ resetInspectionFlag = True
 detections_enable = False
 
 frameCount = 0 #untuk menghitung frame yang telah di cek
-frameLimiter = 30 #batasan maksimal frame yang di cek
-frameDelay = 15 #batasan waktu untuk memulai cek NG
+frameLimiter = 8 #batasan maksimal frame yang di cek
+frameDelay = 2 #batasan waktu untuk memulai cek NG
 frameDelayDone = False
+counter_gagal_baca = 0
+counter_gagal_connect = 0
 
 #definisi variabel global untuk
 latest_frame = None
 buffer_frame_NG1 = None
 buffer_frame_NG2 = None
 buffer_frame_NG3 = None
+original_frame = None
+frame_simpan = None
 
 updateData = {'total_judges': 0,
               'sesion_judges': 0,
@@ -143,7 +147,7 @@ arduino_thread.daemon = True
 def stream_video(device):
     global latest_frame, bearing_detected, inspectionFlag, updateData, resetInspectionFlag
     global frameLimiter, frameCount, buffer_frame_NG1, buffer_frame_NG2, buffer_frame_NG3
-    global frameDelay, frameDelayDone
+    global frameDelay, frameDelayDone, counter_gagal_connect, counter_gagal_baca, original_frame, frame_simpan
     time.sleep(2)
 
     # Retry mechanism
@@ -185,6 +189,7 @@ def stream_video(device):
     while True:
         if not cap.isOpened():
             print("Reinitializing camera...")
+            counter_gagal_connect += 1
             cap.release()
             cap = cv2.VideoCapture(device)
             time.sleep(2)
@@ -193,12 +198,16 @@ def stream_video(device):
         ret, frame = cap.read()
         if not ret:
             print("Tidak dapat membaca frame, mencoba ulang...")
+            counter_gagal_baca += 1
             cap.release()
             cap = cv2.VideoCapture(device)
             time.sleep(2)
             continue
+        #salin frame asli untuk disimpan saat ng untuk bahan training
         
+
         if inspectionFlag and resetInspectionFlag:
+            original_frame = frame
             results = model(frame, conf=0.60, max_det=2)
 
             hitung_yang_ok = 0
@@ -231,7 +240,7 @@ def stream_video(device):
         annotated_frame = frame
         ret, buffer = cv2.imencode('.jpg', annotated_frame)
         frame = buffer.tobytes()
-
+        print(f"===== gagal baca : {counter_gagal_baca}, ===== gagal connect : {counter_gagal_connect}")
         print("flag status: inspection, resetInspect", inspectionFlag, resetInspectionFlag)
         # baca_data_arduino()
 
@@ -261,17 +270,23 @@ def stream_video(device):
             #NG ketika terdeteksi no bearing dan bearing ok
             elif buffer_frame_NG1 is None and hitung_yang_ok > 0 and hitung_yang_ng > 0 and frameCount%frameLimiter != 0 and frameDelayDone:
                 buffer_frame_NG1 = frame
-                print("================ ng1") 
+                frame_simpan1 = original_frame
+
+                print("================ ng1 ========================================================") 
 
             #NG Ketika terdeteksi no_bearing
             elif buffer_frame_NG2 is None and hitung_yang_ng > 0 and frameCount%frameLimiter != 0 and frameDelayDone:
-                print("================= ng2")
+                print("================= ng2 ========================================================")
                 buffer_frame_NG2 = frame
+                frame_simpan2 = original_frame
+
 
             #NG ketika terdeteksi 1 bearing saja
             elif buffer_frame_NG1 is None and hitung_yang_ok == 1 and frameCount%frameLimiter != 0 and frameDelayDone: 
                 buffer_frame_NG3 = frame
-                print("================= ng3")
+                frame_simpan3 = original_frame
+
+                print("================= ng3 ========================================================")
 
             #salin frame NG ke latest frame
             elif frameCount%frameLimiter == 0:
@@ -279,10 +294,13 @@ def stream_video(device):
                 #salin frame NG ke latest frame berdasar prioritas
                 if buffer_frame_NG1:
                     latest_frame = buffer_frame_NG1
+                    frame_simpan = frame_simpan1
                 elif buffer_frame_NG2:
                     latest_frame = buffer_frame_NG2
+                    frame_simpan = frame_simpan2
                 elif buffer_frame_NG3 :
                     latest_frame = buffer_frame_NG3
+                    frame_simpan = frame_simpan3
                 else :
                     latest_frame = frame
 
@@ -298,6 +316,7 @@ def stream_video(device):
                 frameDelayDone = False
                 
                 print('Bearing not completed yet')
+                # save_image(frame_simpan, "original", "original_image")
                 save_image(annotated_frame, 'NG', 'not_complete')
                 update_data_dict('last_judgement', bearing_detected)
                 update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
