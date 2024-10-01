@@ -20,8 +20,8 @@ resetInspectionFlag = True
 detections_enable = False
 
 frameCount = 0 #untuk menghitung frame yang telah di cek
-frameLimiter = 8 #batasan maksimal frame yang di cek
-frameDelay = 2 #batasan waktu untuk memulai cek NG
+frameLimiter = 30 #batasan maksimal frame yang di cek
+frameDelay = 5 #batasan waktu untuk memulai cek NG
 frameDelayDone = False
 counter_gagal_baca = 0
 counter_gagal_connect = 0
@@ -78,7 +78,7 @@ def init_serial_connection():
             time.sleep(5)  # Wait for 5 seconds before trying again
 
 def baca_data_arduino():
-    global arduino, inspectionFlag, resetInspectionFlag
+    global arduino, inspectionFlag, resetInspectionFlag, latest_frame
     while True:
         try:
             input_data = arduino.readline().strip().decode('utf-8')
@@ -91,6 +91,7 @@ def baca_data_arduino():
                 print(f"FROM ARDUINO: {input_data}")
                 resetInspectionFlag = True
                 inspectionFlag = False
+                latest_frame = None
                 update_data_dict('trigger_reset', True)
                 break
             else:
@@ -247,7 +248,7 @@ def stream_video(device):
         if inspectionFlag and resetInspectionFlag:
             frameCount += 1
 
-            if frameCount%frameDelay == 0:
+            if frameCount%frameDelay == 0 and not frameDelayDone:
                 frameDelayDone = True
 
             print(f"memulai pengecekan frame ke {frameCount}, batasnya adalah {frameLimiter} frame")
@@ -255,7 +256,7 @@ def stream_video(device):
             #     detected_object = len(r.boxes.cls)
 
             #GOOD ketika ada 2 object dan semuanya OK
-            if  hitung_yang_ok >= 2 :
+            if  hitung_yang_ok >= 2 and frameDelayDone:
                 latest_frame = frame
                 bearing_detected = True
                 resetInspectionFlag = False
