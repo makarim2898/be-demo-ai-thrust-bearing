@@ -20,7 +20,7 @@ resetInspectionFlag = True
 detections_enable = False
 
 frameCount = 0 #untuk menghitung frame yang telah di cek
-frameLimiter = 10 #batasan maksimal frame yang di cek
+frameLimiter = 15 #batasan maksimal frame yang di cek
 frameDelay = 2 #batasan waktu untuk memulai cek NG
 frameDelayDone = False
 counter_gagal_baca = 0
@@ -44,7 +44,9 @@ updateData = {'total_judges': 0,
               }
 
 #load ypur yolo models from
-model = YOLO("./models/model1yolov10n.pt")
+# model = YOLO("./models/model1yolov10n.pt")
+model = YOLO("./models/best.pt")
+
 
 # Class names (replace with your custom names)
 custom_names = {0: "OK", 1: "NG"}  # Update with your actual class IDs and custom names
@@ -291,19 +293,23 @@ def stream_video(device):
 
             #salin frame NG ke latest frame
             elif frameCount%frameLimiter == 0:
-
+                kategori = ""
                 #salin frame NG ke latest frame berdasar prioritas
                 if buffer_frame_NG1:
                     latest_frame = buffer_frame_NG1
                     frame_simpan = frame_simpan1
+                    kategori = "NG1"
                 elif buffer_frame_NG2:
                     latest_frame = buffer_frame_NG2
                     frame_simpan = frame_simpan2
+                    kategori = "NG2"
                 elif buffer_frame_NG3 :
                     latest_frame = buffer_frame_NG3
                     frame_simpan = frame_simpan3
+                    kategori = "NG3"
                 else :
                     latest_frame = frame
+                    kategori = "NG4"
 
                 #kosongkan buffer frame untuk next detection
                 buffer_frame_NG1 = None
@@ -318,7 +324,7 @@ def stream_video(device):
                 
                 print('Bearing not completed yet')
                 # save_image(frame_simpan, "original", "original_image")
-                save_image(annotated_frame, 'NG', 'not_complete')
+                save_image(annotated_frame, 'NG', f'not_good_{kategori}')
                 update_data_dict('last_judgement', bearing_detected)
                 update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
                 kirim_data_ke_arduino("out_ng")
