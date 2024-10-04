@@ -44,7 +44,7 @@ updateData = {'total_judges': 0,
               }
 
 #load ypur yolo models from
-model = YOLO("./models/yolov10_normal_online.pt")
+model = YOLO("./models/yolov10_normal_merge.pt")
 # model = YOLO("./models/best.pt")
 
 
