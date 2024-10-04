@@ -20,7 +20,7 @@ resetInspectionFlag = True
 detections_enable = False
 
 frameCount = 0 #untuk menghitung frame yang telah di cek
-frameLimiter = 15 #batasan maksimal frame yang di cek
+frameLimiter = 18 #batasan maksimal frame yang di cek
 frameDelay = 2 #batasan waktu untuk memulai cek NG
 frameDelayDone = False
 counter_gagal_baca = 0
@@ -44,8 +44,8 @@ updateData = {'total_judges': 0,
               }
 
 #load ypur yolo models from
-# model = YOLO("./models/model1yolov10n.pt")
-model = YOLO("./models/best.pt")
+model = YOLO("./models/yolov10_normal_online.pt")
+# model = YOLO("./models/best.pt")
 
 
 # Class names (replace with your custom names)
