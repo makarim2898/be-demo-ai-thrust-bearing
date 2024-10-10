@@ -82,6 +82,7 @@ def init_serial_connection():
 
 def baca_data_arduino():
     global arduino, inspectionFlag, resetInspectionFlag, latest_frame
+    global frameCount
     while True:
         try:
             input_data = arduino.readline().strip().decode('utf-8')
@@ -95,6 +96,7 @@ def baca_data_arduino():
                 resetInspectionFlag = True
                 inspectionFlag = False
                 latest_frame = None
+                frameCount = 0
                 update_data_dict('trigger_reset', True)
                 break
             else:
