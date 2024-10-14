@@ -29,7 +29,10 @@ updateData = {'total_judges': 0,
               }
 
 #load ypur yolo models from
-model = YOLO("./models/model1yolov10n.pt")
+model_path = "/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/models/use pretrained/weights/best.pt"
+# model = YOLO("./models/yolov10_normal_online.pt")
+# model = YOLO("./models/best.pt")
+model = YOLO(model_path)
 
 # Class names (replace with your custom names)
 custom_names = {0: "OK", 
