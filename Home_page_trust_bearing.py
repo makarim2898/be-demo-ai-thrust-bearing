@@ -213,7 +213,7 @@ def stream_video(device):
 
         if inspectionFlag and resetInspectionFlag:
             original_frame = frame
-            results = model(frame, conf=0.60, max_det=2)
+            results = model(frame, conf=0.60, max_det=2, imgsz=480)
 
             hitung_yang_ok = 0
             hitung_yang_ng = 0
