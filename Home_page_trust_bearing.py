@@ -20,7 +20,7 @@ resetInspectionFlag = True
 detections_enable = False
 
 frameCount = 0 #untuk menghitung frame yang telah di cek
-frameLimiter = 18 #batasan maksimal frame yang di cek
+frameLimiter = 10 #batasan maksimal frame yang di cek
 frameDelay = 2 #batasan waktu untuk memulai cek NG
 frameDelayDone = False
 counter_gagal_baca = 0
