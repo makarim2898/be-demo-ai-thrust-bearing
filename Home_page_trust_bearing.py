@@ -21,7 +21,7 @@ detections_enable = False
 
 frameCount = 0 #untuk menghitung frame yang telah di cek
 frameLimiter = 18 #batasan maksimal frame yang di cek
-frameDelay = 5 #batasan waktu untuk memulai cek NG
+frameDelay = 2 #batasan waktu untuk memulai cek NG
 frameDelayDone = False
 counter_gagal_baca = 0
 counter_gagal_connect = 0
@@ -44,10 +44,9 @@ updateData = {'total_judges': 0,
               }
 
 #load ypur yolo models from
-model_path = "/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/models/use pretrained/weights/best.pt"
-# model = YOLO("./models/yolov10_normal_online.pt")
+model = YOLO("./models/yolov10_normal_online.pt")
 # model = YOLO("./models/best.pt")
-model = YOLO(model_path)
+
 
 # Class names (replace with your custom names)
 custom_names = {0: "OK", 1: "NG"}  # Update with your actual class IDs and custom names
@@ -82,7 +81,6 @@ def init_serial_connection():
 
 def baca_data_arduino():
     global arduino, inspectionFlag, resetInspectionFlag, latest_frame
-    global frameCount
     while True:
         try:
             input_data = arduino.readline().strip().decode('utf-8')
@@ -96,7 +94,6 @@ def baca_data_arduino():
                 resetInspectionFlag = True
                 inspectionFlag = False
                 latest_frame = None
-                frameCount = 0
                 update_data_dict('trigger_reset', True)
                 break
             else:
@@ -249,7 +246,7 @@ def stream_video(device):
         print(f"===== gagal baca : {counter_gagal_baca}, ===== gagal connect : {counter_gagal_connect}")
         print("flag status: inspection, resetInspect", inspectionFlag, resetInspectionFlag)
         # baca_data_arduino()
-        print(f"^^^^^ ini frame count {frameCount} ^^^^^")
+
         if inspectionFlag and resetInspectionFlag:
             frameCount += 1
 
