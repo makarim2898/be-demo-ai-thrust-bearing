@@ -21,7 +21,7 @@ detections_enable = False
 
 frameCount = 0 #untuk menghitung frame yang telah di cek
 frameLimiter = 18 #batasan maksimal frame yang di cek
-frameDelay = 5 #batasan waktu untuk memulai cek NG
+frameDelay = 2 #batasan waktu untuk memulai cek NG
 frameDelayDone = False
 counter_gagal_baca = 0
 counter_gagal_connect = 0
@@ -81,7 +81,7 @@ def init_serial_connection():
             time.sleep(5)  # Wait for 5 seconds before trying again
 
 def baca_data_arduino():
-    global arduino, inspectionFlag, resetInspectionFlag, latest_frame
+    global arduino, inspectionFlag, resetInspectionFlag, latest_frame, frameCount
     while True:
         try:
             input_data = arduino.readline().strip().decode('utf-8')
@@ -96,6 +96,7 @@ def baca_data_arduino():
                 inspectionFlag = False
                 latest_frame = None
                 update_data_dict('trigger_reset', True)
+                frameCount = 0
                 break
             else:
                 update_data_dict('trigger_start', False)
@@ -325,7 +326,7 @@ def stream_video(device):
                 
                 print('Bearing not completed yet')
                 # save_image(frame_simpan, "original", "original_image")
-                save_image(annotated_frame, 'NG', f'not_good_{kategori}')
+                save_image(frame_simpan, 'NG', f'not_good_{kategori}')
                 update_data_dict('last_judgement', bearing_detected)
                 update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
                 kirim_data_ke_arduino("out_ng")
