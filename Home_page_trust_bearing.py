@@ -9,6 +9,7 @@ import time
 from ultralytics import YOLO
 import serial
 import threading
+import subprocess
 
 home_bearing = Blueprint('bearing_routes', __name__)
 CORS(home_bearing)
@@ -149,12 +150,13 @@ arduino_thread.daemon = True
 ############## end of function untuk arduino communication #########
 
 ############## function untuk stream frame ke client ################
-def stream_video(device):
+def stream_video(index_kamera_yang_di_pakai):
     global latest_frame, bearing_detected, inspectionFlag, updateData, resetInspectionFlag
     global frameLimiter, frameCount, buffer_frame_NG1, buffer_frame_NG2, buffer_frame_NG3
     global frameDelay, frameDelayDone, counter_gagal_connect, counter_gagal_baca, original_frame, frame_simpan
     time.sleep(2)
 
+    device = read_attched_camera_idx(index_kamera_yang_di_pakai)
     # Retry mechanism
     max_retry = 5
     retry_count = 0
@@ -163,6 +165,7 @@ def stream_video(device):
 
     while not cap.isOpened() and retry_count < max_retry:
         print(f"Retrying camera connection... attempt {retry_count + 1}")
+        device = read_attched_camera_idx(index_kamera_yang_di_pakai)
         cap = cv2.VideoCapture(device)
         time.sleep(2)
         retry_count += 1
@@ -196,6 +199,7 @@ def stream_video(device):
             print("Reinitializing camera...")
             counter_gagal_connect += 1
             cap.release()
+            device = read_attched_camera_idx(index_kamera_yang_di_pakai)
             cap = cv2.VideoCapture(device)
             time.sleep(2)
             continue
@@ -205,6 +209,7 @@ def stream_video(device):
             print("Tidak dapat membaca frame, mencoba ulang...")
             counter_gagal_baca += 1
             cap.release()
+            device = read_attched_camera_idx(index_kamera_yang_di_pakai)
             cap = cv2.VideoCapture(device)
             time.sleep(2)
             continue
@@ -428,13 +433,23 @@ def get_total_judges():
     
 get_total_judges()
 
-############# 
+############# reading that camera index setting
 def readCameraIndex():
     df = pd.read_csv('cameraConfig.csv')
     idx_cam_1 = df[df['camera_nm'] == 1]['camera_idx'][0]
     id_camera = idx_cam_1
     return id_camera
 
+############ function untuk membaca index kamera yang terpasang
+def read_attched_camera_idx(index_camera_yang_dimau=0):
+    try:
+        hasil_check_index = subprocess.check_output("ls /dev/video*", text=True, shell=True)
+        array_index = hasil_check_index.strip().split("\n")
+        return array_index[index_camera_yang_dimau]
+    except subprocess.CalledProcessError:
+        print("Tidak ada perangkat kamera yang terdeteksi.")
+        return None
+    
 ############################################################# END POINT ####################################################################################
 @home_bearing.route('/bearing/show-video', methods=['GET'])
 def home_show_video():
