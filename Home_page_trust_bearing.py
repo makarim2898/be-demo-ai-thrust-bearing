@@ -165,7 +165,7 @@ def stream_video(index_kamera_yang_di_pakai):
 
     while not cap.isOpened() and retry_count < max_retry:
         print(f"Retrying camera connection... attempt {retry_count + 1}")
-        device = read_attched_camera_idx(index_kamera_yang_di_pakai)
+        # device = read_attched_camera_idx(index_kamera_yang_di_pakai)
         cap = cv2.VideoCapture(device)
         time.sleep(2)
         retry_count += 1
@@ -199,7 +199,7 @@ def stream_video(index_kamera_yang_di_pakai):
             print("Reinitializing camera...")
             counter_gagal_connect += 1
             cap.release()
-            device = read_attched_camera_idx(index_kamera_yang_di_pakai)
+            device = read_attched_camera_idx()
             cap = cv2.VideoCapture(device)
             time.sleep(2)
             continue
@@ -209,7 +209,7 @@ def stream_video(index_kamera_yang_di_pakai):
             print("Tidak dapat membaca frame, mencoba ulang...")
             counter_gagal_baca += 1
             cap.release()
-            device = read_attched_camera_idx(index_kamera_yang_di_pakai)
+            # device = read_attched_camera_idx(index_kamera_yang_di_pakai)
             cap = cv2.VideoCapture(device)
             time.sleep(2)
             continue
@@ -337,7 +337,7 @@ def stream_video(index_kamera_yang_di_pakai):
                 kirim_data_ke_arduino("out_ng")
 
             inspectionFlag = False
-      
+        print('===== sucess send inference =====')
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
@@ -448,7 +448,7 @@ def read_attched_camera_idx(index_camera_yang_dimau=0):
         return array_index[index_camera_yang_dimau]
     except subprocess.CalledProcessError:
         print("Tidak ada perangkat kamera yang terdeteksi.")
-        return None
+        return 0
     
 ############################################################# END POINT ####################################################################################
 @home_bearing.route('/bearing/show-video', methods=['GET'])

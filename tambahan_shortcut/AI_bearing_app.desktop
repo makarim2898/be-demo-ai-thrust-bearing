@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=AI Bearing App
+Exec=gnome-terminal -- bash -c "/home/kaizen-ai/Desktop/thrust_bearing_app/AI_bearing_app.sh"
+Icon=/home/kaizen-ai/Desktop/thrust_bearing_app/visual-intelligence.svg
+Terminal=true
+
