@@ -45,7 +45,7 @@ updateData = {'total_judges': 0,
               }
 
 #load ypur yolo models from
-model_path = "/home/kaizen-ai/Desktop/thrust_bearing_app/python-backend/models/use pretrained/weights/best.pt"
+model_path = ".models/use pretrained/weights/best.pt"
 # model = YOLO("./models/yolov10_normal_online.pt")
 # model = YOLO("./models/best.pt")
 model = YOLO(model_path)
