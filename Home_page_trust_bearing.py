@@ -255,10 +255,6 @@ def stream_video(index_kamera_yang_di_pakai):
         # baca_data_arduino()
         print(f"^^^^^ ini frame count {frameCount} ^^^^^")
         if inspectionFlag and resetInspectionFlag:
-            frameCount += 1
-
-            if frameCount%frameDelay == 0 and not frameDelayDone:
-                frameDelayDone = True
 
             print(f"memulai pengecekan frame ke {frameCount}, batasnya adalah {frameLimiter} frame")
             # for r in results:
@@ -337,6 +333,11 @@ def stream_video(index_kamera_yang_di_pakai):
                 update_data_dict('sesion_judges', updateData['sesion_judges'] + 1)
                 kirim_data_ke_arduino("out_ng")
 
+            frameCount += 1
+
+            if frameCount%frameDelay == 0 and not frameDelayDone:
+                frameDelayDone = True
+                
             inspectionFlag = False
         print('===== sucess send inference =====')
         yield (b'--frame\r\n'
