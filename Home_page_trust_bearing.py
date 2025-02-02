@@ -45,7 +45,7 @@ updateData = {'total_judges': 0,
               }
 
 #load ypur yolo models from
-model_path = ".models/use pretrained/weights/best.pt"
+model_path = "./models/use pretrained/weights/best.pt"
 # model = YOLO("./models/yolov10_normal_online.pt")
 # model = YOLO("./models/best.pt")
 model = YOLO(model_path)
@@ -63,7 +63,7 @@ def init_serial_connection():
     while True:
         print("init_serial_connection called")
         try:
-            arduino = serial.Serial('/dev/arduino', 115200, timeout=0.1)  # Initialize the Arduino port with shorter timeout
+            arduino = serial.Serial('/dev/ttyACM0', 115200, timeout=0.1)  # Initialize the Arduino port with shorter timeout
             if arduino.isOpen():  # Check if the serial port is open
                 arduino.close()  # Close the port if it is open
             arduino.open()  # Reopen the serial port
@@ -249,7 +249,7 @@ def stream_video(index_kamera_yang_di_pakai):
         
         annotated_frame = frame
         ret, buffer = cv2.imencode('.jpg', annotated_frame)
-        frame = buffer.tobytes()
+        frame_response = buffer.tobytes()
         print(f"===== gagal baca : {counter_gagal_baca}, ===== gagal connect : {counter_gagal_connect}")
         print("flag status: inspection, resetInspect", inspectionFlag, resetInspectionFlag)
         # baca_data_arduino()
@@ -266,7 +266,7 @@ def stream_video(index_kamera_yang_di_pakai):
 
             #GOOD ketika ada 2 object dan semuanya OK
             if  hitung_yang_ok >= 2 and frameDelayDone:
-                latest_frame = frame
+                latest_frame = frame_response
                 bearing_detected = True
                 resetInspectionFlag = False
                 inspectionFlag = False
@@ -279,21 +279,21 @@ def stream_video(index_kamera_yang_di_pakai):
             
             #NG ketika terdeteksi no bearing dan bearing ok
             elif buffer_frame_NG1 is None and hitung_yang_ok > 0 and hitung_yang_ng > 0 and frameCount%frameLimiter != 0 and frameDelayDone:
-                buffer_frame_NG1 = frame
-                frame_simpan1 = original_frame
+                buffer_frame_NG1 = frame_response
+                frame_simpan1 = frame
 
                 print("================ ng1 ========================================================") 
 
             #NG Ketika terdeteksi no_bearing
             elif buffer_frame_NG2 is None and hitung_yang_ng > 0 and frameCount%frameLimiter != 0 and frameDelayDone:
                 print("================= ng2 ========================================================")
-                buffer_frame_NG2 = frame
-                frame_simpan2 = original_frame
+                buffer_frame_NG2 = frame_response
+                frame_simpan2 = frame
 
 
             #NG ketika terdeteksi 1 bearing saja
             elif buffer_frame_NG1 is None and hitung_yang_ok == 1 and frameCount%frameLimiter != 0 and frameDelayDone: 
-                buffer_frame_NG3 = frame
+                buffer_frame_NG3 = frame_response
                 frame_simpan3 = original_frame
 
                 print("================= ng3 ========================================================")
@@ -315,7 +315,8 @@ def stream_video(index_kamera_yang_di_pakai):
                     frame_simpan = frame_simpan3
                     kategori = "NG3"
                 else :
-                    latest_frame = frame
+                    latest_frame = frame_response
+                    frame_simpan = frame
                     kategori = "NG4"
 
                 #kosongkan buffer frame untuk next detection
@@ -339,7 +340,7 @@ def stream_video(index_kamera_yang_di_pakai):
             inspectionFlag = False
         print('===== sucess send inference =====')
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_response + b'\r\n')
 
     cap.release()
     cv2.destroyAllWindows()
