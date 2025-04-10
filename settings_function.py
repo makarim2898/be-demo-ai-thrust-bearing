@@ -197,7 +197,7 @@ def reset_settings():
 ##########################    SAVE DATA PARAMETER BY INDEX CAMERA    ##############################################################################
 @settings.route('/settings-save', methods=['GET'])
 def save_settings():
-    global zoom_level, focus_level, id_camera
+    # global zoom_level, focus_level, id_camera
     print('saving parameters')
     df = pd.read_csv('camera_parameters.csv')
 # Convert data to a pandas DataFrame
@@ -240,7 +240,7 @@ def save_settings():
 #################################   send data parameter to client   #################################################################
 @settings.route('/settings-get', methods=['GET'])
 def get_settings():
-    global zoom_level, focus_level, id_camera
+    # global zoom_level, focus_level, id_camera
     df = pd.read_csv('camera_parameters.csv')
     camera_parameters = df.to_dict(orient='records')
     print(camera_parameters) 
