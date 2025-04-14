@@ -529,7 +529,7 @@ updateData = {'total_judges': 0,
               }
 
 #load ypur yolo models from
-model_path = "./models/use pretrained/weights/best.pt"
+model_path = "./models/yolo11 bearing AI.pt"
 # model = YOLO("./models/yolov10_normal_online.pt")
 # model = YOLO("./models/best.pt")
 model = YOLO(model_path)
