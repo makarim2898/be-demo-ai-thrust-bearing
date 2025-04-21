@@ -3,7 +3,7 @@ import cv2
 from ultralytics import YOLO
 
 # Load the YOLOv8 model
-model = YOLO("/home/komputer/Desktop/thrust_bearing_app/python-backend/models/best.pt")
+model = YOLO("./models/yolo11 bearing AI.pt")
 
 # Open the video file
 cap = cv2.VideoCapture(0)
