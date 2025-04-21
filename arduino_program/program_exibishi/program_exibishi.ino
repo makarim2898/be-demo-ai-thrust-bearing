@@ -1,3 +1,10 @@
+#include <Adafruit_NeoPixel.h>
+
+#define PIN        A0      // Pin yang terhubung ke DIN LED strip
+#define NUMPIXELS  9     // Jumlah LED di strip-mu, ubah sesuai kebutuhan
+
+Adafruit_NeoPixel strip(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
 //inisaialisasi input
 //modifikasi hanya kirim sinyal trigger saja
 #define start_trigger  10//diff down di plc karena pc delay
@@ -23,7 +30,11 @@ void setup() {
 
   //definisi pin output
   pinMode(ok_trigger, OUTPUT);
-
+  
+  strip.begin();           
+  strip.show();            // Matikan semua LED awalnya
+  strip.fill(strip.Color(255, 255, 255)); // Putih
+  strip.show();            // Tampilkan warna
   // inisialisasi serial
   Serial.begin(115200);
 
