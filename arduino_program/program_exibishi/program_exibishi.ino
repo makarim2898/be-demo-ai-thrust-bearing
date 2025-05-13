@@ -7,11 +7,11 @@ Adafruit_NeoPixel strip(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 //inisaialisasi input
 //modifikasi hanya kirim sinyal trigger saja
-#define start_trigger  10//diff down di plc karena pc delay
-#define reset_trigger 12 //diff up di plc biar continous loop di python
+#define start_trigger  9//diff down di plc karena pc delay
+#define reset_trigger 10 //diff up di plc biar continous loop di python
 
 //inisialisasi output  
-#define ok_trigger 7 //untuk trigger plc
+#define ok_trigger 5 //untuk trigger plc
 
 void matikan_lampu(int pin_out = -1){
     // matikan semua output
