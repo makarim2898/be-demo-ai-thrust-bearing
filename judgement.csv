@@ -45,8 +45,23 @@ inspection_id,inspection_date,inspection_time,inspection_result,image_path
 44,20250410,161806,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20250410_161806.jpg
 45,20250410,161841,GOOD,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/bearing_complete/GOOD_20250410_161841.jpg
 46,20250410,161854,NG,/home/komputer/Desktop/thrust_bearing_app/python-backend/Downloads/not_good_NG4/NG_20250410_161854.jpg
+<<<<<<< HEAD
 47,20250419,155009,NG,/home/kaizen/Desktop/demo_ai/be-demo-ai-thrust-bearing/Downloads/not_complete/NG_20250419_155009.jpg
 48,20250513,125241,NG,/home/kaizen/Desktop/demo_ai/be-demo-ai-thrust-bearing/Downloads/not_complete/NG_20250513_125241.jpg
 49,20250513,125243,NG,/home/kaizen/Desktop/demo_ai/be-demo-ai-thrust-bearing/Downloads/not_complete/NG_20250513_125243.jpg
 50,20250513,125244,NG,/home/kaizen/Desktop/demo_ai/be-demo-ai-thrust-bearing/Downloads/not_complete/NG_20250513_125244.jpg
 51,20250513,125245,NG,/home/kaizen/Desktop/demo_ai/be-demo-ai-thrust-bearing/Downloads/not_complete/NG_20250513_125245.jpg
+=======
+47,20250419,184857,NG,/home/kaizen/Desktop/exibishi_demo/be-demo-ai-thrust-bearing/Downloads/not_good_NG4/NG_20250419_184857.jpg
+48,20250419,184929,NG,/home/kaizen/Desktop/exibishi_demo/be-demo-ai-thrust-bearing/Downloads/not_good_NG2/NG_20250419_184929.jpg
+49,20250419,184939,NG,/home/kaizen/Desktop/exibishi_demo/be-demo-ai-thrust-bearing/Downloads/not_good_NG2/NG_20250419_184939.jpg
+50,20250419,184947,NG,/home/kaizen/Desktop/exibishi_demo/be-demo-ai-thrust-bearing/Downloads/not_good_NG2/NG_20250419_184947.jpg
+51,20250419,190009,NG,/home/kaizen/Desktop/exibishi_demo/be-demo-ai-thrust-bearing/Downloads/not_good_NG4/NG_20250419_190009.jpg
+52,20250419,190128,NG,/home/kaizen/Desktop/exibishi_demo/be-demo-ai-thrust-bearing/Downloads/not_good_NG2/NG_20250419_190128.jpg
+53,20250419,190139,NG,/home/kaizen/Desktop/exibishi_demo/be-demo-ai-thrust-bearing/Downloads/not_good_NG4/NG_20250419_190139.jpg
+54,20250419,190227,NG,/home/kaizen/Desktop/exibishi_demo/be-demo-ai-thrust-bearing/Downloads/not_good_NG4/NG_20250419_190227.jpg
+55,20250419,190301,NG,/home/kaizen/Desktop/exibishi_demo/be-demo-ai-thrust-bearing/Downloads/not_good_NG4/NG_20250419_190301.jpg
+56,20250419,190452,NG,/home/kaizen/Desktop/exibishi_demo/be-demo-ai-thrust-bearing/Downloads/not_good_NG3/NG_20250419_190452.jpg
+57,20250419,190505,NG,/home/kaizen/Desktop/exibishi_demo/be-demo-ai-thrust-bearing/Downloads/not_good_NG4/NG_20250419_190505.jpg
+58,20250419,190514,NG,/home/kaizen/Desktop/exibishi_demo/be-demo-ai-thrust-bearing/Downloads/not_good_NG4/NG_20250419_190514.jpg
+>>>>>>> d83df51e78e508cdfa6428af7adb660452f91765
