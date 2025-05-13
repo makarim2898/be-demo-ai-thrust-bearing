@@ -20,13 +20,13 @@ focus_increment = 5
 
 def disable_autofocus_with_v4l2(device, focus_value):
     # Menonaktifkan autofokus
-    os.system(f"sudo v4l2-ctl -d {device} -c focus_automatic_continuous=0")
+    os.system(f"v4l2-ctl -d {device} -c focus_automatic_continuous=0")
     print("Autofokus dinonaktifkan")
 
     print("dah masuk fungsi")
     # new_focus = int(input("Set focus :"))
     # Mengatur fokus manual ke nilai tertentu, misalnya 1010
-    os.system(f"sudo v4l2-ctl -d {device} -c focus_absolute={focus_value}")
+    os.system(f"v4l2-ctl -d {device} -c focus_absolute={focus_value}")
     print(f"Fokus diatur ke {focus_value}")
 
 def setting_zoom(device, zoom_level):
