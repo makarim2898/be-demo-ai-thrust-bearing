@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Stop Thrust Bearing AI
+Comment=Stop Thrust Bearing AI Backend
+Exec=/home/kaizen/Desktop/stop_thrust_bearing.sh
+Icon=process-stop
+Terminal=true
+Categories=Development;

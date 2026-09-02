@@ -26,3 +26,6 @@ inspection_id,inspection_date,inspection_time,inspection_result,image_path
 25,20260902,154311,NG,/home/kaizen/Desktop/demo_ai/be-demo-ai-thrust-bearing/Downloads/not_good_NG3/NG_20260902_154311.jpg
 26,20260902,154321,GOOD,/home/kaizen/Desktop/demo_ai/be-demo-ai-thrust-bearing/Downloads/bearing_complete/GOOD_20260902_154321.jpg
 27,20260902,154327,GOOD,/home/kaizen/Desktop/demo_ai/be-demo-ai-thrust-bearing/Downloads/bearing_complete/GOOD_20260902_154327.jpg
+28,20260902,160341,GOOD,/home/kaizen/Desktop/demo_ai/be-demo-ai-thrust-bearing/Downloads/bearing_complete/GOOD_20260902_160341.jpg
+29,20260902,160353,NG,/home/kaizen/Desktop/demo_ai/be-demo-ai-thrust-bearing/Downloads/not_good_NG3/NG_20260902_160353.jpg
+30,20260902,160358,GOOD,/home/kaizen/Desktop/demo_ai/be-demo-ai-thrust-bearing/Downloads/bearing_complete/GOOD_20260902_160358.jpg

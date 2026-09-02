@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Thrust Bearing AI
+Comment=Start Thrust Bearing AI System
+Exec=/home/kaizen/Desktop/start_thrust_bearing.sh
+Icon=applications-science
+Terminal=true
+Categories=Development;
